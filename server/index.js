@@ -51,8 +51,8 @@ app.get("/api/student", (req, res) => {
         list.push(users[k]);
       }
     });
+    res.send(list);
   });
-  res.send(list);
 });
 
 //View all student, return 1 specific student
@@ -90,4 +90,5 @@ app.post("/api/world", (req, res) => {
 
 app.listen(port, () => console.log(`Listening on port ${port}`));
 
+//to host it on firebase, need to export as app
 //exports.app = functions.https.onRequest(app);
