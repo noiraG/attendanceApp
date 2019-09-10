@@ -1,3 +1,4 @@
+var moment = require("moment");
 const functions = require("firebase-functions");
 const express = require("express");
 const bodyParser = require("body-parser");
@@ -29,66 +30,200 @@ app.use(function(req, res, next) {
   next();
 });
 
-app.get("/api/hello", (req, res) => {
-  console.log("someone access hello");
-  res.json({ express: "Hello From Express" });
-  //   refStudent.push({
-  //     matriculationNo: "U2354670A",
-  //     name: "hui hui Long",
-  //     username: "Huihui01",
-  //     password: "P@ssw0rd",
-  //     role: "S"
-  //   });
-});
-
 //View all student, return all students
 app.get("/api/student", (req, res) => {
-  var list = [];
+  var studentlist = [];
   ref.once("value", function(snapshot) {
     var users = snapshot.val().users;
     Object.keys(users).forEach(k => {
       if (users[k].role == "S") {
-        list.push(users[k]);
+        studentlist.push({
+          key: k,
+          value: users[k]
+        });
       }
     });
-    res.send(list);
+    res.send(studentlist);
   });
 });
 
 //View all student, return 1 specific student
+//url need to change, include reference key
 app.post("/api/student/one", (req, res) => {
-  var targetMatriculation = req.body;
-  ref.once("value", function(snapshot) {
-    var users = snapshot.val().users;
-    Object.keys(users).forEach(k => {
-      if (users[k].matriculationNo == targetMatriculation) {
-        res.send(users[k]);
+  ref
+    .child("users")
+    .orderByChild("matriculationNo")
+    .equalTo(req.body.matriculationNo)
+    .once("value", function(snapshot) {
+      res.send(snapshot.val());
+    });
+});
+
+//update a specific user based on the reference key
+app.post("/api/student/update", (req, res) => {
+  var newData = {
+    matriculationNo: req.body.matriculationNo,
+    name: req.body.name,
+    username: req.body.username,
+    password: req.body.password
+  };
+  ref
+    .child("users")
+    .child(req.body.referenceKey)
+    .update(newData)
+    .then(() => {
+      res.send(true);
+    })
+    .catch(e => {
+      res.send(e);
+    });
+});
+
+//delete a specific student account based on referenceKey
+app.post("/api/student/delete", (req, res) => {
+  ref
+    .child("users")
+    .child(req.body.referenceKey)
+    .remove()
+    .then(() => {
+      res.send(true);
+    })
+    .catch(e => {
+      res.send(e);
+    });
+});
+
+//Add student account
+app.post("/api/student/add/", (req, res) => {
+  parameterList = req.body;
+  //check if user existed
+  ref
+    .child("users")
+    .orderByChild("matriculationNo")
+    .equalTo(parameterList.matriculationNo)
+    .once("value", snapshot => {
+      if (snapshot.exists()) {
+        res.send(false);
+      } else {
+        /* To do: add in face */
+        //add record into the firebase database
+        ref
+          .child("users")
+          .push({
+            matriculationNo: parameterList.matriculationNo,
+            name: parameterList.name,
+            username: parameterList.username,
+            password: parameterList.password,
+            role: "S"
+          })
+          .then(res.send(true));
       }
     });
-  });
 });
 
-//Add account
-app.post("/api/student/add", (req, res) => {
+//View all class, return all class
+app.get("/api/class", (req, res) => {
+  var classSession = [];
+  ref
+    .child("class")
+    .orderByChild("date")
+    .equalTo(moment().format("MM/DD/YYYY"))
+    .once("value", function(snapshot) {
+      var classes = snapshot.val();
+      Object.keys(classes).forEach(k => {
+        classSession.push({
+          key: k,
+          value: classes[k]
+        });
+      });
+      res.send(classSession);
+    });
+});
+
+//Add class session
+app.post("/api/class/add/", (req, res) => {
   parameterList = req.body;
-  console.log(parameterList);
-  //   refStudent.push({
-  //     matriculationNo: "U2354670A",
-  //     name: "hui hui Long",
-  //     username: "Huihui01",
-  //     password: "P@ssw0rd",
-  //     role: "S"
-  //   });
+
+  //check if user existed
+  ref
+    .child("class")
+    .orderByChild("date")
+    .equalTo(moment().format("MM/DD/YYYY"))
+    .once("value", snapshot => {
+      if (snapshot.exists()) {
+        var classSession = snapshot.val();
+        Object.keys(classSession).forEach(k => {
+          if (classSession[k].startingTime == parameterList.startingTime) {
+            res.send(false);
+          } else {
+            if (
+              classSession[k].classIndex == parameterList.classIndex &&
+              classSession[k].courseIndex == parameterList.courseIndex
+            ) {
+              res.send(false);
+            } else {
+              ref
+                .child("class")
+                .push({
+                  courseIndex: parameterList.courseIndex,
+                  classIndex: parameterList.classIndex,
+                  courseName: parameterList.courseName,
+                  supervisor: parameterList.supervisor,
+                  date: moment().format("MM/DD/YYYY"),
+                  startingTime: parameterList.startingTime,
+                  endingTime: parameterList.endingTime
+                })
+                .then(res.send(true))
+                .catch(e => {
+                  console.log(e);
+                });
+            }
+          }
+        });
+      } else {
+        ref
+          .child("class")
+          .push({
+            courseIndex: parameterList.courseIndex,
+            classIndex: parameterList.classIndex,
+            courseName: parameterList.courseName,
+            supervisor: parameterList.supervisor,
+            date: moment().format("MM/DD/YYYY"),
+            startingTime: parameterList.startingTime,
+            endingTime: parameterList.endingTime
+          })
+          .then(res.send(true))
+          .catch(e => {
+            console.log(e);
+          });
+      }
+    });
 });
 
-app.post("/api/world", (req, res) => {
-  console.log(req.body);
-  res.send(
-    `I received your POST request. This is what you sent me: ${req.body.post}`
-  );
+//delete a specific student account based on referenceKey
+app.post("/api/class/delete", (req, res) => {
+  ref
+    .child("class")
+    .child(req.body.referenceKey)
+    .remove()
+    .then(() => {
+      res.send(true);
+    })
+    .catch(e => {
+      res.send(e);
+    });
 });
 
 app.listen(port, () => console.log(`Listening on port ${port}`));
 
 //to host it on firebase, need to export as app
 //exports.app = functions.https.onRequest(app);
+
+//database record order
+/*
+users
+matriculationNo, name, username, password, role, photo
+
+class
+courseIndex, classIndex, courseName, supervisor, date, startingTime, endingTime
+*/
