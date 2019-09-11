@@ -105,7 +105,7 @@ app.post("/api/student/add/", (req, res) => {
       if (snapshot.exists()) {
         res.send(false);
       } else {
-        /* To do: add in face */
+        /* To do: add in face photo*/
         //add record into the firebase database
         ref
           .child("users")
@@ -222,8 +222,11 @@ app.listen(port, () => console.log(`Listening on port ${port}`));
 //database record order
 /*
 users
-matriculationNo, name, username, password, role, photo
+matriculationNo, name, username, password, role, photo (depend on face api)
 
 class
 courseIndex, classIndex, courseName, supervisor, date, startingTime, endingTime
+
+attendance
+class reference, matriculationNo
 */
