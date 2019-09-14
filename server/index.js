@@ -47,7 +47,7 @@ app.get("/api/student", (req, res) => {
   });
 });
 
-//View all student, return 1 specific student
+//View 1 student, return 1 specific student
 //url need to change, include reference key
 app.post("/api/student/one", (req, res) => {
   ref
@@ -105,7 +105,7 @@ app.post("/api/student/add/", (req, res) => {
       if (snapshot.exists()) {
         res.send(false);
       } else {
-        /* To do: add in face */
+        /* To do: add in face photo*/
         //add record into the firebase database
         ref
           .child("users")
@@ -142,8 +142,9 @@ app.get("/api/class", (req, res) => {
 
 //Add class session
 app.post("/api/class/add/", (req, res) => {
-  parameterList = req.body;
-
+  parameterList = req.body.class;
+  matriculationNoList = req.body.matriculationNo;
+  classID = "";
   //check if user existed
   ref
     .child("class")
@@ -162,7 +163,7 @@ app.post("/api/class/add/", (req, res) => {
             ) {
               res.send(false);
             } else {
-              ref
+              classID = ref
                 .child("class")
                 .push({
                   courseIndex: parameterList.courseIndex,
@@ -173,7 +174,21 @@ app.post("/api/class/add/", (req, res) => {
                   startingTime: parameterList.startingTime,
                   endingTime: parameterList.endingTime
                 })
-                .then(res.send(true))
+                .then(
+                  matriculationNoList.forEach(k => {
+                    ref
+                      .child("attendance")
+                      .push({
+                        classReferenceID: classID,
+                        matriculationNo: k,
+                        status: ""
+                      })
+                      .then(res.send(true))
+                      .catch(e => {
+                        console.log(e);
+                      });
+                  })
+                )
                 .catch(e => {
                   console.log(e);
                 });
@@ -181,7 +196,7 @@ app.post("/api/class/add/", (req, res) => {
           }
         });
       } else {
-        ref
+        classID = ref
           .child("class")
           .push({
             courseIndex: parameterList.courseIndex,
@@ -192,7 +207,21 @@ app.post("/api/class/add/", (req, res) => {
             startingTime: parameterList.startingTime,
             endingTime: parameterList.endingTime
           })
-          .then(res.send(true))
+          .then(
+            matriculationNoList.forEach(k => {
+              ref
+                .child("attendance")
+                .push({
+                  classReferenceID: classID,
+                  matriculationNo: k,
+                  status: ""
+                })
+                .then(res.send(true))
+                .catch(e => {
+                  console.log(e);
+                });
+            })
+          )
           .catch(e => {
             console.log(e);
           });
@@ -222,8 +251,11 @@ app.listen(port, () => console.log(`Listening on port ${port}`));
 //database record order
 /*
 users
-matriculationNo, name, username, password, role, photo
+matriculationNo, name, username, password, role, photo (depend on face api)
 
 class
 courseIndex, classIndex, courseName, supervisor, date, startingTime, endingTime
+
+attendance
+class reference, matriculationNo, status
 */
