@@ -96,9 +96,9 @@ app.post("/api/student/one", (req, res) => {
 app.post("/api/student/update", (req, res) => {
   var newData = {
     matriculationNo: req.body.matriculationNo,
-    name: req.body.name,
-    username: req.body.username,
-    password: req.body.password
+        name: req.body.name,
+        username: req.body.username,
+        password: req.body.password
   };
   ref
     .child("users")
@@ -283,6 +283,8 @@ app.post("/api/class/delete", (req, res) => {
       }
     });
 });
+
+//post("/api/auth/login")
 
 app.listen(port, () => console.log(`Listening on port ${port}`));
 
