@@ -34,14 +34,9 @@ app.use(function(req, res, next) {
 app.post("/face", (req, res) => {
   console.log(req);
   let imageFile = req.files.file;
-  imageFile.mv(`${__dirname}/public/${req.body.filename}.jpg`, function(err) {
-    if (err) {
-      return res.status(500).send(err);
-    }
-    /*To Do:
+  /*To Do:
     Insert the face api calling
     **use res.send("message") to return the respond correspond to the face api result*/
-  });
 });
 
 //login - retrieve user based on username and password
@@ -53,12 +48,26 @@ app.post("/login", (req, res) => {
     .once("value", function(snapshot) {
       accountCandidates = snapshot.val();
       if (snapshot.exists()) {
-        Object.keys(accountCandidates).forEach(candidate => {
-          if (accountCandidates[candidate].password == req.body.password) {
-            console.log(accountCandidates[candidate]);
-            res.send(accountCandidates[candidate]);
+        console.log("existed");
+        Object.keys(accountCandidates).forEach(k => {
+          if (accountCandidates[k].password == req.body.password) {
+            candidate = {
+              referenceKey: k,
+              matriculationNo: accountCandidates[k].matriculationNo,
+              name: accountCandidates[k].name,
+              password: accountCandidates[k].password,
+              username: accountCandidates[k].username
+            };
+            console.log(candidate);
+            res.send(candidate);
+          } else {
+            //wrong password
+            res.send(false);
           }
         });
+      } else {
+        //user does not exist
+        res.send(false);
       }
     });
 });
@@ -173,6 +182,7 @@ app.get("/api/class", (req, res) => {
     });
 });
 
+//Need testing
 //Add class session
 app.post("/api/class/add/", (req, res) => {
   incr = 0;
@@ -281,6 +291,64 @@ app.post("/api/class/delete", (req, res) => {
           .child(req.body.referenceKey + i.toString())
           .remove();
       }
+    });
+});
+
+app.post("/api/attendance/update", (req, res) => {
+  console.log(req.body.classDetail);
+  let classDetail = req.body.classDetail;
+  let matriculationNo = req.body.matriculationNo;
+  let classReferenceID = 0;
+  attendanceStatus = {
+    status: "attended"
+  };
+  //find classReferenceKey then search for matriculation number
+  ref
+    .child("class")
+    .orderByChild("date")
+    .equalTo(moment().format("MM/DD/YYYY"))
+    .once("value", function(snapshot) {
+      if (snapshot.exists()) {
+        var classSession = snapshot.val();
+        Object.keys(classSession).forEach(k => {
+          if (
+            classSession[k].courseIndex == classDetail.courseIndex &&
+            classSession[k].classIndex == classDetail.classIndex
+          ) {
+            classReferenceID = k;
+            console.log("classReferenceID found - ", classReferenceID);
+          }
+        });
+      }
+    })
+    .then(
+      ref
+        .child("attendance")
+        .orderByKey()
+        .startAt(String(classReferenceID))
+        .once("value", function(snapshot) {
+          if (snapshot.exists()) {
+            console.log("2nd part using classReferenceID: ", classReferenceID);
+            console.log(snapshot.val());
+            studentInClass = snapshot.val();
+            Object.keys(studentInClass).forEach(k => {
+              if (studentInClass[k].matriculationNo == matriculationNo) {
+                console.log("student attendance record: ", studentInClass[k]);
+                ref
+                  .child("attendance")
+                  .child(k)
+                  .update(attendanceStatus)
+                  .then(res.send(true))
+                  .catch(e => {
+                    res.send(e);
+                  });
+              }
+            });
+          }
+        })
+    )
+    .catch(e => {
+      res.send(e);
     });
 });
 
