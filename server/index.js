@@ -10,7 +10,7 @@ var admin = require("firebase-admin");
 var serviceAccount = require("ay2019-cz3002-alphapro-firebase-adminsdk-xw615-2456290755");
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  databaseURL: "https://my-first-app-19b2e.firebaseio.com"
+  databaseURL: "https://ay2019-cz3002-alphapro.firebaseio.com/"
 });
 
 const db = admin.database();
