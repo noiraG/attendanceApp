@@ -1,26 +1,30 @@
 import React from "react";
 import "./styles.scss";
+import { TAB_CONSTANTS } from "../../constants"
 
 export default class NavigationBar extends React.PureComponent {
 
     render() {
-        const { username, takeAttendanceView, setTakeViewState } = this.props;
-        const userText = username !== undefined ? "Logged in as " + username : "Not logged in";
+        const { username, selectedTab, setTabSelected, authenticated } = this.props;
+        const userText = authenticated ? "Logged in as " + username : "Not logged in";
         return (
             <div className="navigation-container">
                 <div className="header-bar">
                     <div className="header-bar-name">AlphaPro</div>
                     <div className="header-bar-user">{userText}</div>
                 </div>
-                <div className="tab-bar">
+                {authenticated && <div className="tab-bar">
                     <div
-                        className={this.getTabClass(takeAttendanceView)}
-                        onClick={setTakeViewState(true)}>Take Attendance
+                        className={this.getTabClass(selectedTab === TAB_CONSTANTS.TAKE_ATTENDANCE)}
+                        onClick={setTabSelected(TAB_CONSTANTS.TAKE_ATTENDANCE)}>Take Attendance
                     </div>
-                    <div className={this.getTabClass(!takeAttendanceView)}
-                         onClick={setTakeViewState(false)}>View Attendance Records
+                    <div className={this.getTabClass(selectedTab === TAB_CONSTANTS.VIEW_ATTENDANCE)}
+                         onClick={setTabSelected(TAB_CONSTANTS.VIEW_ATTENDANCE)}>View Attendance Records
                     </div>
-                </div>
+                    <div className={this.getTabClass(selectedTab === TAB_CONSTANTS.CREATE_SESSION)}
+                         onClick={setTabSelected(TAB_CONSTANTS.CREATE_SESSION)}>Add Class Session
+                    </div>
+                </div>}
             </div>
         );
     }
