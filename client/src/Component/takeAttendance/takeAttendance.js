@@ -15,22 +15,23 @@ class TakeAttendance extends React.Component {
 
     render() {
         return (
-            <div>
-                <div>Input your Course Code</div>
-                <input type="text" value={this.state.course} onChange={(e) => this.setState({course: e.target.value})}/>
+            <div className="attendance-container">
+                <div className="attendance-header">Input your Course Code</div>
+                <input className="attendance-input" type="text" value={this.state.course} onChange={(e) => this.setState({course: e.target.value})}/>
                 {this.state.showCamera ? <Webcam
                         audio={false}
                         height={300}
                         ref={this.webcamRef}
                         screenshotFormat="image/jpeg"
                         width={500}
-                        videoConstraints={{width: 1280, height: 720, facingMode: "user"}}
+                        videoConstraints={{width: 500, height: 300, facingMode: "user"}}
                     /> :
                     <img src={this.state.image}/>
                 }
-                {this.state.showCamera ? <div className="class-form__btn" onClick={this.webcamCapture}>Take Photo</div> :
-                    <div className="class-form__btn" onClick={this.takeAnother}>Take Another Photo</div>
+                {this.state.showCamera ? <div className="camera-btn" onClick={this.webcamCapture}>Take Photo</div> :
+                    <div className="camera-btn" onClick={this.takeAnother}>Retake Photo</div>
                 }
+                <div className="attendance-btn">Submit</div>
             </div>
         );
     }

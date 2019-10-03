@@ -1,5 +1,5 @@
 import React from "react";
-// import "./styles.scss"
+import "./styles.scss"
 
 export default class Login extends React.Component {
     constructor(props) {
@@ -21,7 +21,7 @@ export default class Login extends React.Component {
         const {startingTime, endingTime, date, classIndex, courseIndex, courseName, supervisor, studentCount, students} = this.state
         const studentList = students
             .map((s, i) => <input
-                className="class-form__input"
+                className="students-form__input"
                 type="text" value={students[i]}
                 onChange={(e) => {
                     students[i] = e.currentTarget.value;
@@ -29,35 +29,54 @@ export default class Login extends React.Component {
                 }}/>)
         return (
             <div className="class-container">
-                <div className="class-landing-msg">Log in to proceed</div>
-                <div className="class-form">
-                    <div className="class-form__header">Course Index</div>
-                    <input className="class-form__input" type="text" value={courseIndex}
-                           onChange={(e) => this.setState({courseIndex: e.currentTarget.value})}/>
-                    <div className="class-form__header">Course Name</div>
-                    <input className="class-form__input" type="text" value={courseName}
-                           onChange={(e) => this.setState({courseName: e.currentTarget.value})}/>
-                    <div className="class-form__header">Class Index</div>
-                    <input className="class-form__input" type="text" value={classIndex}
-                           onChange={(e) => this.setState({classIndex: e.currentTarget.value})}/>
-                    <div className="class-form__header">date</div>
-                    <input className="class-form__input" type="date" value={date}
-                           onChange={(e) => this.setState({date: e.currentTarget.value})}/>
-                    <div className="class-form__header">Starting Time</div>
-                    <input className="class-form__input" type="text" value={startingTime}
-                           onChange={(e) => this.setState({startingTime: e.currentTarget.value})}/>
-                    <div className="class-form__header">Ending Time</div>
-                    <input className="class-form__input" type="text" value={endingTime}
-                           onChange={(e) => this.setState({endingTime: e.currentTarget.value})}/>
-                    <div className="class-form__header">Supervisor</div>
-                    <input className="class-form__input" type="text" value={supervisor}
-                           onChange={(e) => this.setState({supervisor: e.currentTarget.value})}/>
-                    <div className="class-form__header">Students</div>
-                    <div>{studentList}</div>
-                    <div className="class-form__btn" onClick={this.onAddStudent}>+</div>
-                    <div className="class-form__btn" onClick={this.onRemoveStudent}>-</div>
-                    <div className="class-form__btn" onClick={this.onCreateClick}>Create Class</div>
+                <div className="class-form-wrapper">
+                    <div className="class-form">
+                        <div className="class-form__field">
+                            <div className="class-form__header">Course Index</div>
+                            <input className="class-form__input" type="text" value={courseIndex}
+                                   onChange={(e) => this.setState({courseIndex: e.currentTarget.value})}/>
+                        </div>
+                        <div className="class-form__field">
+                            <div className="class-form__header">Course Name</div>
+                            <input className="class-form__input" type="text" value={courseName}
+                                   onChange={(e) => this.setState({courseName: e.currentTarget.value})}/>
+                        </div>
+                        <div className="class-form__field">
+                            <div className="class-form__header">Class Index</div>
+                            <input className="class-form__input" type="text" value={classIndex}
+                                   onChange={(e) => this.setState({classIndex: e.currentTarget.value})}/>
+                        </div>
+                        <div className="class-form__field">
+                            <div className="class-form__header">Date</div>
+                            <input className="class-form__input" type="date" value={date}
+                                   onChange={(e) => this.setState({date: e.currentTarget.value})}/>
+                        </div>
+                        <div className="class-form__field">
+                            <div className="class-form__header">Starting Time</div>
+                            <input className="class-form__input" type="text" value={startingTime}
+                                   onChange={(e) => this.setState({startingTime: e.currentTarget.value})}/>
+                        </div>
+                        <div className="class-form__field">
+                            <div className="class-form__header">Ending Time</div>
+                            <input className="class-form__input" type="text" value={endingTime}
+                                   onChange={(e) => this.setState({endingTime: e.currentTarget.value})}/>
+                        </div>
+                        <div className="class-form__field">
+                            <div className="class-form__header">Supervisor</div>
+                            <input className="class-form__input" type="text" value={supervisor}
+                                   onChange={(e) => this.setState({supervisor: e.currentTarget.value})}/>
+                        </div>
+                    </div>
+                    <div className="students-form">
+                        <div className="students-form__header">Students</div>
+                        <div className="students-form__list">{studentList}</div>
+                        <div className="students-form__btns">
+                            <div className="students-form__btn" onClick={this.onAddStudent}>+</div>
+                            <div className="students-form__btn" onClick={this.onRemoveStudent}>-</div>
+                        </div>
+                    </div>
                 </div>
+                <div className="class-form__btn" onClick={this.onCreateClick}>Create Class</div>
             </div>
         );
     }
@@ -69,7 +88,7 @@ export default class Login extends React.Component {
     }
 
     onRemoveStudent = () => {
-        const { studentCount, students } = this.state;
+        const {studentCount, students} = this.state;
         if (studentCount > 1) {
             students.pop()
             this.setState({studentCount: studentCount - 1, students: students})
@@ -77,7 +96,7 @@ export default class Login extends React.Component {
     }
 
     onCreateClick = () => {
-        const { startingTime, endingTime, date, classIndex, courseIndex, courseName, supervisor, students } = this.state;
+        const {startingTime, endingTime, date, classIndex, courseIndex, courseName, supervisor, students} = this.state;
         fetch("http://localhost:5000/api/class/add/", {
             method: "POST",
             headers: {

@@ -1,6 +1,6 @@
 import React from "react";
 import Webcam from "react-webcam";
-// import "./styles.scss"
+import "./styles.scss"
 
 export default class AddStudent extends React.Component {
     constructor(props) {
@@ -10,7 +10,8 @@ export default class AddStudent extends React.Component {
             name: "",
             username: "",
             password: "",
-            image: null
+            image: null,
+            showCamera: true
         };
         this.webcamRef = React.createRef();
     }
@@ -18,33 +19,41 @@ export default class AddStudent extends React.Component {
     render() {
         const {matriculationNo, name, username, password} = this.state
         return (
-            <div className="class-container">
-                <div className="class-landing-msg">Student Information</div>
-                <div className="class-form">
-                    <div className="class-form__header">Name</div>
-                    <input className="class-form__input" type="text" value={name}
-                           onChange={(e) => this.setState({name: e.currentTarget.value})}/>
-                    <div className="class-form__header">Matriculation Number</div>
-                    <input className="class-form__input" type="text" value={matriculationNo}
-                           onChange={(e) => this.setState({matriculationNo: e.currentTarget.value})}/>
-                    <div className="class-form__header">Username</div>
-                    <input className="class-form__input" type="text" value={username}
-                           onChange={(e) => this.setState({username: e.currentTarget.value})}/>
-                    <div className="class-form__header">Password</div>
-                    <input className="class-form__input" type="password" value={password}
-                           onChange={(e) => this.setState({password: e.currentTarget.value})}/>
-                    <Webcam
-                        audio={false}
-                        height={720}
-                        ref={this.webcamRef}
-                        screenshotFormat="image/jpeg"
-                        width={1280}
-                        videoConstraints={{width: 1280, height: 720, facingMode: "user"}}
-                    />
-                    <div className="class-form__btn" onClick={this.webcamCapture}>Take Photo</div>
-                    <div className="class-form__btn" onClick={this.onBtnClick}>Submit</div>
+            <div className="student-container">
+                <div className="student-wrapper">
+                    <div className="student-form">
+                        <div className="student-form__header">Name</div>
+                        <input className="student-form__input" type="text" value={name}
+                               onChange={(e) => this.setState({name: e.currentTarget.value})}/>
+                        <div className="student-form__header">Matriculation Number</div>
+                        <input className="student-form__input" type="text" value={matriculationNo}
+                               onChange={(e) => this.setState({matriculationNo: e.currentTarget.value})}/>
+                        <div className="student-form__header">Username</div>
+                        <input className="student-form__input" type="text" value={username}
+                               onChange={(e) => this.setState({username: e.currentTarget.value})}/>
+                        <div className="student-form__header">Password</div>
+                        <input className="student-form__input" type="password" value={password}
+                               onChange={(e) => this.setState({password: e.currentTarget.value})}/>
+                    </div>
+                    <div className="student-camera">
+                        {this.state.showCamera ? <Webcam className="student-camera__feed"
+                                audio={false}
+                                height={300}
+                                ref={this.webcamRef}
+                                screenshotFormat="image/jpeg"
+                                width={500}
+                                videoConstraints={{width: 500, height: 300, facingMode: "user"}}
+                            /> :
+                            <img className="student-camera__feed" src={this.state.image}/>
+                        }
+                        {this.state.showCamera ? <div className="student-camera__btn" onClick={this.webcamCapture}>Take Photo</div> :
+                            <div className="student-camera__btn" onClick={this.takeAnother}>Retake Photo</div>
+                        }
+                    </div>
                 </div>
+                <div className="student-form__btn" onClick={this.onBtnClick}>Submit</div>
             </div>
+
         );
     }
 
@@ -68,6 +77,10 @@ export default class AddStudent extends React.Component {
 
     webcamCapture = () => {
         const imageSrc = this.webcamRef.current.getScreenshot();
-        this.setState({image: imageSrc});
+        this.setState({image: imageSrc, showCamera: false});
+    }
+
+    takeAnother = () => {
+        this.setState({showCamera: true});
     }
 }
