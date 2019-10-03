@@ -1,0 +1,67 @@
+.student-container {
+  box-sizing: content-box;
+  padding-top: 150px;
+  width: 100vw;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.student-wrapper {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  width: 100%;
+  justify-content: center;
+}
+
+.student-form {
+  display: flex;
+  flex-direction: column;
+  width: 30%;
+  align-items: center;
+
+  &__header {
+    text-align: left;
+  }
+
+  &__input {
+    width: 150px;
+    border-radius: 5px;
+    border: 1px solid #333333;
+    padding: 5px;
+    margin: 0 20px 20px 20px;
+
+    &:focus {
+      outline: none;
+      background-color: #E4E4E4;
+    }
+  }
+
+  &__btn {
+    background-color: #333333;
+    border: 1px solid #333333;
+    color: #FFFFFF;
+    border-radius: 5px;
+    margin: 30px 5px 5px 5px;
+    padding: 5px;
+    width: 200px;
+  }
+}
+
+.student-camera {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+
+  &__btn {
+    background-color: #333333;
+    border: 1px solid #333333;
+    color: #FFFFFF;
+    border-radius: 5px;
+    margin: -40px 5px 5px 5px;
+    z-index:  100;
+    padding: 5px;
+    width: 200px;
+  }
+}
