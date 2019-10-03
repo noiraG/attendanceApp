@@ -7,7 +7,7 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 var admin = require("firebase-admin");
-var serviceAccount = require("ay2019-cz3002-alphapro-firebase-adminsdk-xw615-2456290755");
+var serviceAccount = require("./ay2019-cz3002-alphapro-firebase-adminsdk-xw615-2456290755");
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
   databaseURL: "https://ay2019-cz3002-alphapro.firebaseio.com/"
@@ -72,18 +72,19 @@ app.post("/login", (req, res) => {
               matriculationNo: accountCandidates[k].matriculationNo,
               name: accountCandidates[k].name,
               password: accountCandidates[k].password,
-              username: accountCandidates[k].username
+              username: accountCandidates[k].username,
+              admin: accountCandidates[k].role=="A" ? true:false
             };
             console.log(candidate);
             res.send(candidate);
           } else {
             //wrong password
-            res.send(false);
+            res.send({status: false, message: "Wrong Password"});
           }
         });
       } else {
         //user does not exist
-        res.send(false);
+        res.send({status: false, message: "Wrong Username"});
       }
     });
 });
@@ -133,7 +134,7 @@ app.post("/api/student/one", (req, res) => {
     This function require the front end to POST req's body with:
       1. matriculationNo
     If record matched, the detail of the user will be send back:
-      student: 
+      student:
       {
         key,
         value: {
@@ -177,9 +178,9 @@ app.post("/api/student/update", (req, res) => {
 
   var newData = {
     matriculationNo: req.body.matriculationNo,
-    name: req.body.name,
-    username: req.body.username,
-    password: req.body.password
+        name: req.body.name,
+        username: req.body.username,
+        password: req.body.password
   };
   ref
     .child("users")
@@ -313,7 +314,6 @@ app.post("/api/class/add/", (req, res) => {
   incr = 0;
   parameterList = req.body.class;
   matriculationNo = req.body.matriculationNo;
-  console.log(matriculationNo);
   classPath = "";
   //check if user existed
   ref
@@ -404,7 +404,7 @@ app.post("/api/class/delete", (req, res) => {
   /* note:
     This function require the front end to POST req's body with:
       1. referenceKey of specific class
-    If record is removed, 
+    If record is removed,
       then remove attendance record of the respective class session
       send back true
   */
@@ -436,7 +436,7 @@ app.post("/api/attendance/update", (req, res) => {
         a. courseIndex
         b. classIndex
       2. matriculationNo
-    This function will find the class reference key based on courseIndex and classIndex 
+    This function will find the class reference key based on courseIndex and classIndex
       then update the attendance record of the specific student in the class session
       send back true
   */
@@ -497,6 +497,8 @@ app.post("/api/attendance/update", (req, res) => {
       res.send(e);
     });
 });
+
+//post("/api/auth/login")
 
 app.listen(port, () => console.log(`Listening on port ${port}`));
 
