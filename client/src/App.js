@@ -6,6 +6,7 @@ import TakeAttendance from "./Component/takeAttendance/takeAttendance";
 import Login from "./Component/login/login";
 import { TAB_CONSTANTS } from "./constants";
 import CreateClassSession from "./Component/createClassSession/createClassSession";
+import AddStudent from "./Component/addStudent/addStudent";
 
 export default class App extends React.Component {
     state = {
@@ -55,6 +56,8 @@ export default class App extends React.Component {
                 return <TakeAttendance/>
             case TAB_CONSTANTS.CREATE_SESSION:
                 return <CreateClassSession/>
+            case TAB_CONSTANTS.ADD_STUDENT:
+                return <AddStudent/>
         }
     }
 

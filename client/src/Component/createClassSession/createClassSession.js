@@ -69,7 +69,7 @@ export default class Login extends React.Component {
     }
 
     onRemoveStudent = () => {
-        const {studentCount, students} = this.state;
+        const { studentCount, students } = this.state;
         if (studentCount > 1) {
             students.pop()
             this.setState({studentCount: studentCount - 1, students: students})
@@ -77,7 +77,7 @@ export default class Login extends React.Component {
     }
 
     onCreateClick = () => {
-        const {startingTime, endingTime, date, classIndex, courseIndex, courseName, supervisor, students} = this.state;
+        const { startingTime, endingTime, date, classIndex, courseIndex, courseName, supervisor, students } = this.state;
         fetch("http://localhost:5000/api/class/add/", {
             method: "POST",
             headers: {
