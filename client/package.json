@@ -19,7 +19,7 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "client": "yarn start",
-    "server": "cd ../../server && nodemon index.js",
+    "server": "cd ../server && nodemon index.js",
     "dev": "concurrently --kill-others-on-fail \"yarn server\" \"yarn client\""
   },
   "devDependencies": {
