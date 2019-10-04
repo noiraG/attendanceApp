@@ -36,10 +36,13 @@ class TakeAttendance extends React.Component {
         );
     }
 
-    webcamCapture = () => {
+    webcamCapture = async() => {
         const imageSrc = this.webcamRef.current.getScreenshot();
         this.setState({image: imageSrc, showCamera: false});
     }
+
+
+
 
     takeAnother = () => {
         this.setState({showCamera: true});
