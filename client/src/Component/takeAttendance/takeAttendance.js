@@ -72,7 +72,7 @@ class TakeAttendance extends React.Component {
             },
             descriptor: {
               _descriptors: res.descriptor,
-              _label: "U1880216A"
+              _label: "U1880215A"
             }
           })
         })
