@@ -515,14 +515,14 @@ app.post("/api/attendance/update", (req, res) => {
                               /* To Do:
                                 get the then to work
                                 */
-
-                              generateModel(
+                              generateModelResult(
                                 userDescriptor,
                                 Arraydescriptor
-                              ).then(result => {
-                                console.log("result is: ", result);
-                                if (result == matriculationNo) {
+                              ).then(function() {
+                                console.log("detectValue is: ", detectValue);
+                                if (detectValue == matriculationNo) {
                                   //if result is correct, update the attendance record
+                                  console.log("updating");
                                   ref
                                     .child("attendance")
                                     .orderByKey()
@@ -598,7 +598,7 @@ attendance
     class_reference, matriculationNo, status
 */
 
-generateModel = async (userDescriptor, descriptorArray) => {
+async function generateModelResult(userDescriptor, descriptorArray) {
   user = null;
   descriptor = [];
   counter = 1;
@@ -617,22 +617,19 @@ generateModel = async (userDescriptor, descriptorArray) => {
     );
 
     descriptor = [];
-    if (counter == descriptorArray.length) {
-      model = new faceapi.FaceMatcher(LabeledFaceDescriptors);
-      faceDescriptor = [];
+    model = new faceapi.FaceMatcher(LabeledFaceDescriptors);
+    faceDescriptor = [];
 
-      //   console.log("the userDescriptor property is: ", userDescriptor);
+    //   console.log("the userDescriptor property is: ", userDescriptor);
 
-      Object.keys(userDescriptor._descriptors).forEach(k => {
-        faceDescriptor.push(userDescriptor._descriptors[k]);
-      });
-      //   console.log(faceDescriptor.length);
-      faceDescriptor = new Float32Array(faceDescriptor);
+    Object.keys(userDescriptor._descriptors).forEach(k => {
+      faceDescriptor.push(userDescriptor._descriptors[k]);
+    });
+    //   console.log(faceDescriptor.length);
+    faceDescriptor = new Float32Array(faceDescriptor);
 
-      const bestMatch = model.findBestMatch(faceDescriptor);
-      console.log("bestMatch personel is: ", bestMatch._label);
-      return bestMatch._label.toString();
-    }
-    counter++;
+    const bestMatch = model.findBestMatch(faceDescriptor);
+    detectValue = bestMatch._label.toString();
+    return detectValue;
   });
-};
+}
