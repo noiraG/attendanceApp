@@ -1,6 +1,9 @@
 import React from "react";
 import Webcam from "react-webcam";
+import canvas from "canvas";
 import "./styles.scss"
+
+const faceapi = require('face-api.js');
 
 export default class AddStudent extends React.Component {
     constructor(props) {
@@ -10,6 +13,7 @@ export default class AddStudent extends React.Component {
             name: "",
             username: "",
             password: "",
+            descriptor: null,
             image: null,
             showCamera: true
         };
@@ -37,16 +41,21 @@ export default class AddStudent extends React.Component {
                     </div>
                     <div className="student-camera">
                         {this.state.showCamera ? <Webcam className="student-camera__feed"
-                                audio={false}
-                                height={300}
-                                ref={this.webcamRef}
-                                screenshotFormat="image/jpeg"
-                                width={500}
-                                videoConstraints={{width: 500, height: 300, facingMode: "user"}}
+                                                         audio={false}
+                                                         height={300}
+                                                         ref={this.webcamRef}
+                                                         screenshotFormat="image/jpeg"
+                                                         width={500}
+                                                         videoConstraints={{
+                                                             width: 500,
+                                                             height: 300,
+                                                             facingMode: "user"
+                                                         }}
                             /> :
-                            <img className="student-camera__feed" src={this.state.image}/>
+                            <img id="photo" className="student-camera__feed" src={this.state.image}/>
                         }
-                        {this.state.showCamera ? <div className="student-camera__btn" onClick={this.webcamCapture}>Take Photo</div> :
+                        {this.state.showCamera ?
+                            <div className="student-camera__btn" onClick={this.webcamCapture}>Take Photo</div> :
                             <div className="student-camera__btn" onClick={this.takeAnother}>Retake Photo</div>
                         }
                     </div>
@@ -59,25 +68,43 @@ export default class AddStudent extends React.Component {
 
 
     onBtnClick = () => {
-        const {matriculationNo, name, username, password, image} = this.state;
-        fetch("http://localhost:5000/api/student/add/", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                matriculationNo: matriculationNo,
-                name: name,
-                username: username,
-                password: password,
-                image: image
-            }),
-        }).then((res) => res.json()).then((res) => console.log(res));
+        const {matriculationNo, name, username, password} = this.state;
+        this.generateDescriptors().then(
+            (res) => {
+                console.log( JSON.stringify(res.descriptor))
+                fetch("http://localhost:5000/api/student/add/", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        matriculationNo: matriculationNo,
+                        name: name,
+                        username: username,
+                        password: password,
+                        descriptor: res.descriptor
+                    }),
+                }).then((res) => res.json()).then((res) => console.log(res));
+            }).catch(e => console.log(e))
+
     }
 
-    webcamCapture = () => {
+    webcamCapture = async () => {
         const imageSrc = this.webcamRef.current.getScreenshot();
         this.setState({image: imageSrc, showCamera: false});
+    }
+
+    generateDescriptors = async () => {
+        await faceapi.nets.ssdMobilenetv1.loadFromUri('/models')
+        await faceapi.nets.faceLandmark68Net.loadFromUri('/models')
+        await faceapi.nets.faceRecognitionNet.loadFromUri('/models')
+        await faceapi.nets.faceExpressionNet.loadFromUri('/models')
+        // let image = document.getElementById("photo");
+        let result = await faceapi.detectSingleFace("photo", new faceapi.SsdMobilenetv1Options({minConfidence: 0.5}))
+            .withFaceLandmarks()
+            .withFaceExpressions()
+            .withFaceDescriptor()
+        return result
     }
 
     takeAnother = () => {
