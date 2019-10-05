@@ -274,11 +274,13 @@ app.get("/api/class", (req, res) => {
                     {
                       key,
                       value: {
-                        matriculationNo,
-                        name,
-                        password,
-                        role,
-                        username
+                        classIndex,
+                        courseIndex,
+                        courseName,
+                        date,
+                        endingTime,
+                        startingTime,
+                        supervisor
                       }
                     },
                     {
@@ -441,92 +443,33 @@ app.post("/api/class/delete", (req, res) => {
 
 //update attendance status to attended based on classDetail and matriculationNo of the student
 app.post("/api/attendance/update", (req, res) => {
+
     /* note:
         This function require the front end to POST req's body with:
-          1. classDetail
-            a. courseIndex
-            b. classIndex
-          2. matriculationNo
-        This function will find the class reference key based on courseIndex and classIndex
-          then update the attendance record of the specific student in the class session
-          send back true
-      */
+            1. classDetail
+                a. courseIndex
+                b. classIndex
+            2. descriptor
+                a. _descriptor
+                b. _label
+        The function will search for the class session referenceKey with the 'TODAY', courseIndex and classIndex:
+          Then search for all matriculationNo in the class session and store it in ArrayMatriculation
+            Search for all the descriptor with the ArrayMatriculation and store each of the descriptor into Arraydescriptor
+                Train a model with the Arraydescriptor and matchFace using the trained model and userDescriptor
+                    if result is equal to matriculationNo
+                        update the user 'TODAY' class attendance of the given courseIndex and classIndex
+    */
 
-    //   console.log(req.body.classDetail);
-    let classDetail = req.body.classDetail;
-    let matriculationNo = req.body.matriculationNo;
-    let classReferenceID = 0;
-    attendanceStatus = {
-        status: "attended"
-    };
-    //find classReferenceKey then search for matriculation number
-    ref
-        .child("class")
-        .orderByChild("date")
-        .equalTo(moment().format("MM/DD/YYYY"))
-        .once("value", function (snapshot) {
-            if (snapshot.exists()) {
-                var classSession = snapshot.val();
-                Object.keys(classSession).forEach(k => {
-                    if (
-                        classSession[k].courseIndex == classDetail.courseIndex &&
-                        classSession[k].classIndex == classDetail.classIndex
-                    ) {
-                        classReferenceID = k;
-                        // console.log("classReferenceID found - ", classReferenceID);
-                    }
-                });
-            }
-        })
-        .then(
-            ref
-                .child("attendance")
-                .orderByKey()
-                .startAt(String(classReferenceID))
-                .once("value", function (snapshot) {
-                    if (snapshot.exists()) {
-                        // console.log("2nd part using classReferenceID: ", classReferenceID);
-                        // console.log(snapshot.val());
-                        studentInClass = snapshot.val();
-                        Object.keys(studentInClass).forEach(k => {
-                            if (studentInClass[k].matriculationNo == matriculationNo) {
-                                // console.log("student attendance record: ", studentInClass[k]);
-                                ref
-                                    .child("attendance")
-                                    .child(k)
-                                    .update(attendanceStatus)
-                                    .then(res.send(true))
-                                    .catch(e => {
-                                        res.send(e);
-                                    });
-                            }
-                        });
-                    }
-                })
-        )
-        .then(res.send(Arraydescriptor))
-        .catch(e => {
-            res.send(e);
-        });
-});
-
-//fetch the array of descriptor
-app.post("/api/attendance/fetch", (req, res) => {
-    /* note:
-          This function require the front end to POST req's body with:
-              1. classDetail
-              a. courseIndex
-              b. classIndex
-          This function will find the class reference key based on courseIndex and classIndex
-          search for all metriculationNo in the list attendance record then search for all metriculationNo descriptor
-          and send back array of descriptor, matriculationNo
-      */
     var classDetail = req.body.classDetail;
+    var userDescriptor = req.body.descriptor
+    var matriculationNo = userDescriptor._label
     var classReferenceID = 0;
     var counter1 = 1;
     var ArrayMatriculation = [];
     var Arraydescriptor = [];
-
+    attendanceStatus = {
+        status: "attended"
+    };
     ref
         .child("class")
         .orderByChild("date")
@@ -545,6 +488,7 @@ app.post("/api/attendance/fetch", (req, res) => {
             }
         })
         .then(
+            //find all the student of the class session
             ref
                 .child("attendance")
                 .orderByKey()
@@ -555,6 +499,7 @@ app.post("/api/attendance/fetch", (req, res) => {
                         Object.keys(studentInClass).forEach(k => {
                             ArrayMatriculation.push(studentInClass[k].matriculationNo);
                         }),
+                        //forming of the array of descriptor
                             Object.keys(ArrayMatriculation).forEach(k => {
                                 let oneNo = ArrayMatriculation[k];
                                 ref
@@ -568,9 +513,44 @@ app.post("/api/attendance/fetch", (req, res) => {
                                                 console.log(student[k].descriptor);
                                                 Arraydescriptor.push(student[k].descriptor);
                                             });
-                                            console.log(counter1);
+                                            //cannot then after forEach, so using a simple counter to do it
                                             if (counter1 == ArrayMatriculation.length) {
-                                                res.send(Arraydescriptor);
+                                                //creating the model
+                                                model = generateModel(Arraydescriptor)
+                                                //check for result with the user descriptor
+                                                result = matchFace(userDescriptor, model)
+                                                if (result == matriculationNo)
+                                                {
+                                                    //if result is correct, update the attendance record
+                                                    ref
+                                                    .child("attendance")
+                                                    .orderByKey()
+                                                    .startAt(String(classReferenceID))
+                                                    .once("value", function (snapshot) {
+                                                        if (snapshot.exists()) {
+                                                            // console.log("2nd part using classReferenceID: ", classReferenceID);
+                                                            // console.log(snapshot.val());
+                                                            studentInClass = snapshot.val();
+                                                            Object.keys(studentInClass).forEach(k => {
+                                                                if (studentInClass[k].matriculationNo == matriculationNo) {
+                                                                    // console.log("student attendance record: ", studentInClass[k]);
+                                                                    ref
+                                                                        .child("attendance")
+                                                                        .child(k)
+                                                                        .update(attendanceStatus)
+                                                                        .then(res.send(true))
+                                                                        .catch(e => {
+                                                                            res.send(e);
+                                                                        });
+                                                                }
+                                                            });
+                                                        }
+                                                    })
+                                                }
+                                                else{
+                                                    //face matching result is wrong
+                                                    res.send(false)
+                                                }
                                             }
                                             counter1++;
                                         } else {
