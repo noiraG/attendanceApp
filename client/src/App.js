@@ -5,7 +5,7 @@ import { BrowserRouter as Router, Route, Redirect } from "react-router-dom";
 import TakeAttendance from "./Component/takeAttendance/takeAttendance";
 import Login from "./Component/login/login";
 import { TAB_CONSTANTS } from "./constants";
-import CreateClassSession from "./Component/createClassSession/createClassSession";
+import ViewClassSession from "./Component/viewClass/viewClassSession";
 import AddStudent from "./Component/addStudent/addStudent";
 import ViewAttendance from "./Component/ViewAttendance/viewAttendance";
 
@@ -61,11 +61,11 @@ export default class App extends React.Component {
     if (!this.state.authenticated) return <Redirect to="/login" />;
     switch (this.state.selectedTab) {
       case TAB_CONSTANTS.TAKE_ATTENDANCE:
-        return <TakeAttendance />;
+        return <TakeAttendance matriculationNo={this.state.referencekey} />;
       case TAB_CONSTANTS.VIEW_ATTENDANCE:
         return <ViewAttendance matriculationNo={this.state.referenceKey} />;
-      case TAB_CONSTANTS.CREATE_SESSION:
-        return <CreateClassSession />;
+      case TAB_CONSTANTS.VIEW_SESSION:
+        return <ViewClassSession />;
       case TAB_CONSTANTS.ADD_STUDENT:
         return <AddStudent />;
     }

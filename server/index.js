@@ -288,11 +288,11 @@ app.get("/api/class", (req, res) => {
                   ]
       */
 
+  console.log("getting class session");
   var classSession = [];
   ref
     .child("class")
     .orderByChild("date")
-    .equalTo(moment().format("MM/DD/YYYY"))
     .once("value", function(snapshot) {
       var classes = snapshot.val();
       Object.keys(classes).forEach(k => {
@@ -301,6 +301,7 @@ app.get("/api/class", (req, res) => {
           value: classes[k]
         });
       });
+      console.log("returning class session", classSession);
       res.send(classSession);
     });
 });
@@ -429,7 +430,7 @@ app.post("/api/class/delete", (req, res) => {
     .remove()
     .then(() => {
       for (i = 0; i < 50; i++) {
-        console.log(req.body.referenceKey + i.toString());
+        // console.log(req.body.referenceKey + i.toString());
         ref
           .child("attendance")
           .child(req.body.referenceKey + i.toString())
