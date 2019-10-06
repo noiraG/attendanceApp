@@ -102,7 +102,6 @@ export default class AddStudent extends React.Component {
     const { matriculationNo, name, username, password } = this.state;
     this.generateDescriptors()
       .then(res => {
-        console.log(res.descriptor);
         console.log(JSON.stringify(res.descriptor));
         fetch("http://localhost:5000/api/student/add/", {
           method: "POST",

@@ -67,8 +67,8 @@ class TakeAttendance extends React.Component {
           },
           body: JSON.stringify({
             classDetail: {
-              courseIndex: "CZ2002",
-              classIndex: "102111"
+              courseIndex: "CZ2001",
+              classIndex: "10229"
             },
             descriptor: {
               _descriptors: res.descriptor,

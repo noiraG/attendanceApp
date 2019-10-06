@@ -63,7 +63,7 @@ app.post("/login", (req, res) => {
         else:
         1. send back false
       */
-
+  console.log("login");
   ref
     .child("users")
     .orderByChild("username")
@@ -71,12 +71,10 @@ app.post("/login", (req, res) => {
     .once("value", function(snapshot) {
       accountCandidates = snapshot.val();
       if (snapshot.exists()) {
-        console.log("existed");
         Object.keys(accountCandidates).forEach(k => {
           if (accountCandidates[k].password == req.body.password) {
             candidate = {
               referenceKey: k,
-              matriculationNo: accountCandidates[k].matriculationNo,
               name: accountCandidates[k].name,
               password: accountCandidates[k].password,
               username: accountCandidates[k].username,
@@ -439,6 +437,82 @@ app.post("/api/class/delete", (req, res) => {
       }
       res.send(true);
     });
+});
+
+//Retrieve attendance list based on matriculationNo of the individual
+app.post("/api/attendance/view/", (req, res) => {
+  /* note:
+        This function require the front end to post the api:
+          1. matriculationNo
+          it will return with a list of attendance of the individual matriculationNo:
+          attendancelist: [
+            {
+              matriculationNo,
+              value: {
+                name,
+                password,
+                role,
+                username
+              }
+            },
+            {
+              matriculationNo,
+              value
+            }
+          ]
+      */
+
+  matriculationNo = req.body.matriculationNo;
+  let attendancelist = [];
+  let convertedAttendanceList = [];
+  let counter1 = 1;
+  ref.once("value", function(snapshot) {
+    let attendance = snapshot.val().attendance;
+    Object.keys(attendance).forEach(k => {
+      if (attendance[k].matriculationNo == matriculationNo) {
+        attendancelist.push({
+          key: k,
+          value: attendance[k]
+        });
+      }
+    });
+    Object.keys(attendancelist).forEach(k => {
+      classkey = attendancelist[k].value.classReferenceID;
+      attendanceDetail = attendancelist[k];
+      ref
+        .child("class")
+        .orderByKey()
+        .equalTo(classkey)
+        .once("value", function(snapshot) {
+          if (snapshot.exists()) {
+            classDetail = snapshot.val();
+
+            Object.keys(classDetail).forEach(k => {
+              classDetail = classDetail[k];
+            });
+            console.log("class detail ", classDetail);
+            console.log("attendance detail ", attendanceDetail);
+            convertedAttendanceList.push({
+              classReferenceID: attendanceDetail.value.classReferenceID,
+              classIndex: classDetail.classIndex,
+              courseIndex: classDetail.courseIndex,
+              courseName: classDetail.courseName,
+              date: classDetail.date,
+              endingTime: classDetail.endingTime,
+              startingTime: classDetail.startingTime,
+              supervisor: classDetail.supervisor,
+              attendanceReferenceID: attendanceDetail.key,
+              status: attendanceDetail.value.status
+            });
+          }
+          if (counter1 == attendancelist.length) {
+            // console.log(convertedAttendanceList);
+            res.send(convertedAttendanceList);
+          }
+          counter1++;
+        });
+    });
+  });
 });
 
 //update attendance status to attended based on classDetail and matriculationNo of the student
