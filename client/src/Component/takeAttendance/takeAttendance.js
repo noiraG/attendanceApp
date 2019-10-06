@@ -9,7 +9,9 @@ class TakeAttendance extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      matriculationNo: props.matriculationNo,
       course: "",
+      class: "",
       image: null,
       showCamera: true
     };
@@ -25,6 +27,13 @@ class TakeAttendance extends React.Component {
           type="text"
           value={this.state.course}
           onChange={e => this.setState({ course: e.target.value })}
+        />
+        <div className="attendance-header">Input your Class Code</div>
+        <input
+          className="attendance-input"
+          type="text"
+          value={this.state.class}
+          onChange={e => this.setState({ class: e.target.value })}
         />
         {this.state.showCamera ? (
           <Webcam
@@ -67,12 +76,12 @@ class TakeAttendance extends React.Component {
           },
           body: JSON.stringify({
             classDetail: {
-              courseIndex: "CZ2001",
-              classIndex: "10229"
+              courseIndex: this.state.course,
+              classIndex: this.state.class
             },
             descriptor: {
               _descriptors: res.descriptor,
-              _label: "U1880215A"
+              _label: this.state.matriculationNo
             }
           })
         })

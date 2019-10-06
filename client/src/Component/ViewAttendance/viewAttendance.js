@@ -46,7 +46,7 @@ class ViewAttendance extends React.Component {
             <TableBody>
               {this.state.attendance.map(record => {
                 return (
-                  <TableRow id={record.attendanceReferenceID}>
+                  <TableRow key={record.attendanceReferenceID}>
                     <TableCell component="th" scope="row">
                       {record.courseIndex}
                     </TableCell>
