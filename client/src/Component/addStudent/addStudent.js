@@ -117,9 +117,19 @@ export default class AddStudent extends React.Component {
           })
         })
           .then(res => res.json())
-          .then(res => console.log(res));
+          .then(res => {
+            this.setState({
+              matriculationNo: "",
+              name: "",
+              username: "",
+              password: "",
+              descriptor: null,
+              image: null,
+              showCamera: true})
+            alert("Student has been added")
+          });
       })
-      .catch(e => console.log(e));
+      .catch(e => alert("Photo not valid. Please retake and try again"));
   };
 
   webcamCapture = async () => {
@@ -132,7 +142,6 @@ export default class AddStudent extends React.Component {
     await faceapi.nets.faceLandmark68Net.loadFromUri("/models");
     await faceapi.nets.faceRecognitionNet.loadFromUri("/models");
     await faceapi.nets.faceExpressionNet.loadFromUri("/models");
-    // let image = document.getElementById("photo");
     let result = await faceapi
       .detectSingleFace(
         "photo",

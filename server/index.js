@@ -651,6 +651,55 @@ app.post("/api/attendance/update", (req, res) => {
     });
 });
 
+
+app.post("/api/attendance/admin-update", (req, res) => {
+  /* note:
+        This function require the front end to POST req's body with:
+            1. classDetail
+                a. courseIndex
+                b. classIndex
+            2. matriculationNo
+        The function will search for the class session referenceKey with the 'TODAY', courseIndex and classIndex:
+                        update the user 'TODAY' class attendance of the given courseIndex and classIndex
+    */
+
+  var classDetail = req.body.classDetail;
+  var matriculationNo = req.body.matriculationNo;
+  var classReferenceID = 0;
+  var counter1 = 1;
+  attendanceStatus = {
+    status: "attended"
+  };
+  ref
+      .child("attendance")
+      .orderByKey()
+      .startAt(String(classReferenceID))
+      .once("value", function(snapshot) {
+        if (snapshot.exists()) {
+          studentInClass = snapshot.val();
+          Object.keys(studentInClass).forEach(
+              k => {
+                if (
+                    studentInClass[k]
+                        .matriculationNo ==
+                    matriculationNo
+                ) {
+                  // console.log("student attendance record: ", studentInClass[k]);
+                  ref
+                      .child("attendance")
+                      .child(k)
+                      .update(attendanceStatus)
+                      .then(res.send(true))
+                      .catch(e => {
+                        res.send(e);
+                      });
+                }
+              }
+          );
+        }
+      });
+});
+
 //post("/api/auth/login")
 
 app.listen(port, () => console.log(`Listening on port ${port}`));
