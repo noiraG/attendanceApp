@@ -11,7 +11,6 @@ export default class AddStudent extends React.Component {
     this.state = {
       matriculationNo: "",
       name: "",
-      username: "",
       password: "",
       descriptor: null,
       image: null,
@@ -42,13 +41,13 @@ export default class AddStudent extends React.Component {
                 this.setState({ matriculationNo: e.currentTarget.value })
               }
             />
-            <div className="student-form__header">Username</div>
+            {/* <div className="student-form__header">Username</div>
             <input
               className="student-form__input"
               type="text"
               value={username}
               onChange={e => this.setState({ username: e.currentTarget.value })}
-            />
+            /> */}
             <div className="student-form__header">Password</div>
             <input
               className="student-form__input"
@@ -111,7 +110,7 @@ export default class AddStudent extends React.Component {
           body: JSON.stringify({
             matriculationNo: matriculationNo,
             name: name,
-            username: username,
+            username: matriculationNo,
             password: password,
             descriptor: res.descriptor
           })
@@ -125,8 +124,9 @@ export default class AddStudent extends React.Component {
               password: "",
               descriptor: null,
               image: null,
-              showCamera: true})
-            alert("Student has been added")
+              showCamera: true
+            });
+            alert("Student has been added");
           });
       })
       .catch(e => alert("Photo not valid. Please retake and try again"));

@@ -22,6 +22,13 @@ admin.initializeApp({
 
 const db = admin.database();
 
+
+const asyncMiddleware = fn =>
+  (req, res, next) => {
+    Promise.resolve(fn(req, res, next))
+      .catch(next);
+  };
+
 // creating a starting path in our database
 const ref = db.ref("ASE");
 
@@ -37,14 +44,7 @@ app.use(function (req, res, next) {
     next();
 });
 
-//receive a face image then call face api to idenify
-app.post("/face", (req, res) => {
-    console.log(req);
-    let imageFile = req.files.file;
-    /*To Do:
-          Insert the face api calling
-          **use res.send("message") to return the respond correspond to the face api result*/
-});
+var model;
 
 //login - retrieve user based on username and password
 app.post("/login", (req, res) => {
@@ -229,6 +229,7 @@ app.post("/api/student/add/", (req, res) => {
             else, add the student account
               If record is added, send back true
         */
+    console.log('adding student')
     parameterList = req.body;
     //check if user existed
 
@@ -517,139 +518,209 @@ app.post("/api/attendance/view/", (req, res) => {
 });
 
 //update attendance status to attended based on classDetail and matriculationNo of the student
-app.post("/api/attendance/update", (req, res) => {
-    /* note:
-          This function require the front end to POST req's body with:
-              1. classDetail
-                  a. courseIndex
-                  b. classIndex
-              2. descriptor
-                  a. _descriptor
-                  b. _label
-          The function will search for the class session referenceKey with the 'TODAY', courseIndex and classIndex:
-            Then search for all matriculationNo in the class session and store it in ArrayMatriculation
-              Search for all the descriptor with the ArrayMatriculation and store each of the descriptor into Arraydescriptor
-                  Train a model with the Arraydescriptor and matchFace using the trained model and userDescriptor
-                      if result is equal to matriculationNo
-                          update the user 'TODAY' class attendance of the given courseIndex and classIndex
-      */
-
+app.post("/api/attendance/update2", asyncMiddleware(async (req, res) => {
+/* note:
+        This function require the front end to POST req's body with:
+            1. classDetail
+                a. courseIndex
+                b. classIndex
+            2. descriptor
+                a. _descriptor
+                b. _label
+        The function will search for the class session referenceKey with the 'TODAY', courseIndex and classIndex:
+            matchFace using the trained model and userDescriptor
+                    if result is equal to matriculationNo
+                        update the user 'TODAY' class attendance of the given courseIndex and classIndex
+*/
+    console.log('update attendance')
+    console.log('model property: ', model)
     var classDetail = req.body.classDetail;
     var userDescriptor = req.body.descriptor;
     var matriculationNo = userDescriptor._label;
     console.log(matriculationNo);
     var classReferenceID = 0;
-    var counter1 = 1;
-    var ArrayMatriculation = [];
-    var Arraydescriptor = [];
     attendanceStatus = {
         status: "attended"
     };
-    ref
-        .child("class")
-        .orderByChild("date")
-        .equalTo(moment().format("MM/DD/YYYY"))
-        .once("value", function (snapshot) {
-            if (snapshot.exists()) {
-                var classSession = snapshot.val();
-                Object.keys(classSession).forEach(k => {
-                    if (
-                        classSession[k].courseIndex == classDetail.courseIndex &&
-                        classSession[k].classIndex == classDetail.classIndex
-                    ) {
-                        // console.log("ID located");
-                        classReferenceID = k;
-                        // console.log(classReferenceID);
+    
+    const classSessionS = await new Promise((resolve, reject) => ref.child("class").orderByChild("date").equalTo(moment().format('MM/DD/YYYY')).once('value', resolve));
+    if(!classSessionS.exists()) {
+        // if snapshot dont exist
+    }
 
-                        //find all the student of the class session
-                        ref
-                            .child("attendance")
-                            .orderByKey()
-                            .startAt(classReferenceID.toString())
-                            .once("value", function (snapshot) {
-                                if (snapshot.exists()) {
-                                    studentInClass = snapshot.val();
-                                    Object.keys(studentInClass).forEach(k => {
-                                        ArrayMatriculation.push(studentInClass[k].matriculationNo);
-                                    }),
-                                        //forming of the array of descriptor
-                                        Object.keys(ArrayMatriculation).forEach(k => {
-                                            let oneNo = ArrayMatriculation[k];
-                                            ref
-                                                .child("users")
-                                                .orderByKey()
-                                                .equalTo(oneNo)
-                                                .once("value", function (snapshot) {
-                                                    if (snapshot.exists()) {
-                                                        student = snapshot.val();
-                                                        Object.keys(student).forEach(k => {
-                                                            Arraydescriptor.push(student[k].descriptor);
-                                                        });
-                                                        //cannot then after forEach, so using a simple counter to do it
-                                                        if (counter1 == ArrayMatriculation.length) {
-                                                            /* To Do:
-                                                              get the then to work
-                                                              */
-                                                            generateModelResult(
-                                                                userDescriptor,
-                                                                Arraydescriptor
-                                                            ).then(function (detectValue) {
-                                                                console.log("detectValue is: ", detectValue);
-                                                                if (detectValue == matriculationNo) {
-                                                                    //if result is correct, update the attendance record
-                                                                    console.log("updating");
-                                                                    ref
-                                                                        .child("attendance")
-                                                                        .orderByKey()
-                                                                        .startAt(String(classReferenceID))
-                                                                        .once("value", function (snapshot) {
-                                                                            if (snapshot.exists()) {
-                                                                                // console.log("2nd part using classReferenceID: ", classReferenceID);
-                                                                                // console.log(snapshot.val());
-                                                                                studentInClass = snapshot.val();
-                                                                                Object.keys(studentInClass).forEach(
-                                                                                    k => {
-                                                                                        if (
-                                                                                            studentInClass[k]
-                                                                                                .matriculationNo ==
-                                                                                            matriculationNo
-                                                                                        ) {
-                                                                                            // console.log("student attendance record: ", studentInClass[k]);
-                                                                                            ref
-                                                                                                .child("attendance")
-                                                                                                .child(k)
-                                                                                                .update(attendanceStatus)
-                                                                                                .then(res.send(true))
-                                                                                                .catch(e => {
-                                                                                                    res.send(e);
-                                                                                                });
-                                                                                        }
-                                                                                    }
-                                                                                );
-                                                                            }
-                                                                        });
-                                                                } else {
-                                                                    //face matching result is wrong
-                                                                    res.send(false);
-                                                                }
-                                                            });
-                                                        }
-                                                        counter1++;
-                                                    } else {
-                                                        res.send(false);
-                                                    }
-                                                });
-                                        });
-                                }
-                            });
+    var classSession = classSessionS.val();
+    Object.keys(classSession).forEach(k => {
+        if (
+            classSession[k].courseIndex == classDetail.courseIndex &&
+            classSession[k].classIndex == classDetail.classIndex
+        ) {
+            // console.log("ID located");
+            classReferenceID = k;
+            // console.log(classReferenceID);
+        }
+    });
+
+    const result = await matchingFaceResult(userDescriptor, model);
+
+    console.log('result: ', result)
+    if (result == matriculationNo) {
+        //if result is correct, update the attendance record
+        console.log("updating");
+        let snapshot = await new Promise(resolve => ref.child("attendance").orderByKey().startAt(String(classReferenceID)).once("value", resolve));
+        
+        if (snapshot.exists()) {
+            studentInClass = snapshot.val();
+            Object.keys(studentInClass).forEach(async k => {
+                    if (studentInClass[k].matriculationNo == matriculationNo) {
+                        await ref.child("attendance").child(k).update(attendanceStatus);
+                        res.send(true);
                     }
-                });
-            }
-        })
-        .catch(e => {
-            res.send(e);
-        });
-});
+                }
+            );
+        }
+        else{
+            res.send(false)
+        }
+    } else {
+        //face matching result is wrong
+        res.send(false);
+    }
+}));
+
+// //update attendance status to attended based on classDetail and matriculationNo of the student
+// app.post("/api/attendance/update", (req, res) => {
+//     /* note:
+//           This function require the front end to POST req's body with:
+//               1. classDetail
+//                   a. courseIndex
+//                   b. classIndex
+//               2. descriptor
+//                   a. _descriptor
+//                   b. _label
+//           The function will search for the class session referenceKey with the 'TODAY', courseIndex and classIndex:
+//             Then search for all matriculationNo in the class session and store it in ArrayMatriculation
+//               Search for all the descriptor with the ArrayMatriculation and store each of the descriptor into Arraydescriptor
+//                   Train a model with the Arraydescriptor and matchFace using the trained model and userDescriptor
+//                       if result is equal to matriculationNo
+//                           update the user 'TODAY' class attendance of the given courseIndex and classIndex
+//       */
+
+//     var classDetail = req.body.classDetail;
+//     var userDescriptor = req.body.descriptor;
+//     var matriculationNo = userDescriptor._label;
+//     console.log(matriculationNo);
+//     var classReferenceID = 0;
+//     var counter1 = 1;
+//     var ArrayMatriculation = [];
+//     var Arraydescriptor = [];
+//     attendanceStatus = {
+//         status: "attended"
+//     };
+//     ref
+//         .child("class")
+//         .orderByChild("date")
+//         .equalTo(moment().format("MM/DD/YYYY"))
+//         .once("value", function (snapshot) {
+//             if (snapshot.exists()) {
+//                 var classSession = snapshot.val();
+//                 Object.keys(classSession).forEach(k => {
+//                     if (
+//                         classSession[k].courseIndex == classDetail.courseIndex &&
+//                         classSession[k].classIndex == classDetail.classIndex
+//                     ) {
+//                         // console.log("ID located");
+//                         classReferenceID = k;
+//                         // console.log(classReferenceID);
+
+//                         //find all the student of the class session
+//                         ref
+//                             .child("attendance")
+//                             .orderByKey()
+//                             .startAt(classReferenceID.toString())
+//                             .once("value", function (snapshot) {
+//                                 if (snapshot.exists()) {
+//                                     studentInClass = snapshot.val();
+//                                     Object.keys(studentInClass).forEach(k => {
+//                                         ArrayMatriculation.push(studentInClass[k].matriculationNo);
+//                                     }),
+//                                         //forming of the array of descriptor
+//                                         Object.keys(ArrayMatriculation).forEach(k => {
+//                                             let oneNo = ArrayMatriculation[k];
+//                                             ref
+//                                                 .child("users")
+//                                                 .orderByKey()
+//                                                 .equalTo(oneNo)
+//                                                 .once("value", function (snapshot) {
+//                                                     if (snapshot.exists()) {
+//                                                         student = snapshot.val();
+//                                                         Object.keys(student).forEach(k => {
+//                                                             Arraydescriptor.push(student[k].descriptor);
+//                                                         });
+//                                                         //cannot then after forEach, so using a simple counter to do it
+//                                                         if (counter1 == ArrayMatriculation.length) {
+//                                                             /* To Do:
+//                                                               get the then to work
+//                                                               */
+//                                                             generateModelResult(
+//                                                                 userDescriptor,
+//                                                                 Arraydescriptor
+//                                                             ).then(function (detectValue) {
+//                                                                 console.log("detectValue is: ", detectValue);
+//                                                                 if (detectValue == matriculationNo) {
+//                                                                     //if result is correct, update the attendance record
+//                                                                     console.log("updating");
+//                                                                     ref
+//                                                                         .child("attendance")
+//                                                                         .orderByKey()
+//                                                                         .startAt(String(classReferenceID))
+//                                                                         .once("value", function (snapshot) {
+//                                                                             if (snapshot.exists()) {
+//                                                                                 // console.log("2nd part using classReferenceID: ", classReferenceID);
+//                                                                                 // console.log(snapshot.val());
+//                                                                                 studentInClass = snapshot.val();
+//                                                                                 Object.keys(studentInClass).forEach(
+//                                                                                     k => {
+//                                                                                         if (
+//                                                                                             studentInClass[k]
+//                                                                                                 .matriculationNo ==
+//                                                                                             matriculationNo
+//                                                                                         ) {
+//                                                                                             // console.log("student attendance record: ", studentInClass[k]);
+//                                                                                             ref
+//                                                                                                 .child("attendance")
+//                                                                                                 .child(k)
+//                                                                                                 .update(attendanceStatus)
+//                                                                                                 .then(res.send(true))
+//                                                                                                 .catch(e => {
+//                                                                                                     res.send(e);
+//                                                                                                 });
+//                                                                                         }
+//                                                                                     }
+//                                                                                 );
+//                                                                             }
+//                                                                         });
+//                                                                 } else {
+//                                                                     //face matching result is wrong
+//                                                                     res.send(false);
+//                                                                 }
+//                                                             });
+//                                                         }
+//                                                         counter1++;
+//                                                     } else {
+//                                                         res.send(false);
+//                                                     }
+//                                                 });
+//                                         });
+//                                 }
+//                             });
+//                     }
+//                 });
+//             }
+//         })
+//         .catch(e => {
+//             res.send(e);
+//         });
+// });
 
 
 app.post("/api/attendance/admin-update", (req, res) => {
@@ -676,14 +747,10 @@ app.post("/api/attendance/admin-update", (req, res) => {
         .startAt(String(classReferenceID))
         .once("value", function (snapshot) {
             if (snapshot.exists()) {
-                studentInClass = snapshot.val();
+                let studentInClass = snapshot.val();
                 Object.keys(studentInClass).forEach(
                     k => {
-                        if (
-                            studentInClass[k]
-                                .matriculationNo ==
-                            matriculationNo
-                        ) {
+                        if (studentInClass[k].matriculationNo == matriculationNo) {
                             // console.log("student attendance record: ", studentInClass[k]);
                             ref
                                 .child("attendance")
@@ -722,6 +789,7 @@ attendance
     class_reference, matriculationNo, status
 */
 
+/*
 generateModelResult = async (userDescriptor, descriptorArray) => {
     let user = null;
     let counter = 1;
@@ -744,7 +812,7 @@ generateModelResult = async (userDescriptor, descriptorArray) => {
             new faceapi.LabeledFaceDescriptors(user, [descriptor])
         );
     })
-    let model = await new faceapi.FaceMatcher(LabeledFaceDescriptors);
+    let model = await new faceapi.FaceMatcher(LabeledFaceDescriptors, 0.6);
     faceDescriptor = [];
 
     //   console.log("the userDescriptor property is: ", userDescriptor);
@@ -758,4 +826,78 @@ generateModelResult = async (userDescriptor, descriptorArray) => {
     let bestMatch = await model.findBestMatch(faceDescriptor);
     detectValue = bestMatch._label.toString();
     return detectValue;
+}*/
+
+
+
+startingProcess = async () =>{
+    var globalStudentdescriptorlist = [];
+    ref.child('users').once("value", function (snapshot) {
+        var users = snapshot.val();
+        Object.keys(users).forEach(k => {
+            if (users[k].role == "S") {
+                globalStudentdescriptorlist.push({
+                    descriptor: users[k].descriptor
+                });
+            }
+        });
+    }).then(()=>{
+         return generateModel(globalStudentdescriptorlist);
+    })
 }
+
+generateModel = async (descriptorArray) =>{
+    console.log('generating model')
+    await faceapi.nets.ssdMobilenetv1.loadFromDisk("./models");
+    await faceapi.nets.faceLandmark68Net.loadFromDisk("./models");
+    await faceapi.nets.faceRecognitionNet.loadFromDisk("./models");
+
+    const LabeledFaceDescriptors = [];
+
+    // console.log('array is: ' , descriptorArray)
+    Object.keys(descriptorArray).forEach(k=>{
+        let user_descSet = descriptorArray[k].descriptor._descriptors;
+        // console.log('user_descSet is: ', user_descSet)
+        let user = descriptorArray[k].descriptor._label;
+        console.log('user matriculationNo is: ', user)
+        let user_descriptorSet = [];
+        Object.keys(user_descSet).forEach(k =>{
+            let user_desc = user_descSet[k];
+            // console.log('user_des is: ', user_desc)
+            let descriptor = [];
+            Object.keys(user_desc).forEach(k => {
+                descriptor.push(user_desc[k]);
+            })
+            descriptor = new Float32Array(descriptor);
+            user_descriptorSet.push(descriptor)
+        })
+        user_descriptorSet = new Float32Array(user_descriptorSet)
+        LabeledFaceDescriptors.push(
+            new faceapi.LabeledFaceDescriptors(user, [user_descriptorSet])
+        )
+    })
+    console.log('creating model')
+    model =  await new faceapi.FaceMatcher(LabeledFaceDescriptors, 0.6)
+    
+}
+
+matchingFaceResult = async (userDescriptor, faceCatcher)=>{
+    console.log('matching Face')
+    faceDescriptor = [];
+
+    //   console.log("the userDescriptor property is: ", userDescriptor);
+
+    Object.keys(userDescriptor._descriptors).forEach(k => {
+        faceDescriptor.push(userDescriptor._descriptors[k]);
+    });
+
+    faceDescriptor = new Float32Array(faceDescriptor);
+    console.log('faceDescriptor: ', faceDescriptor)
+
+    let bestMatch = await faceCatcher.findBestMatch([faceDescriptor]);
+    return bestMatch._label.toString();
+    
+}
+
+console.log('starting server preparation')
+startingProcess()
