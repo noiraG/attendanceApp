@@ -1,10 +1,10 @@
-.navigation-container{
+.navigation-container {
   position: absolute;
   width: 100%;
 }
 
-.header-bar{
-  background-color: #470680;
+.header-bar {
+  background-color: #3e64ff;
   height: 50px;
   width: 100%;
   top: 0;
@@ -16,14 +16,14 @@
   padding: 0 20px 0 20px;
 }
 
-.header-bar-name{
-  color: #FFFFFF;
+.header-bar-name {
+  color: #ffffff;
   margin: auto;
   padding-left: 250px;
 }
 
-.header-bar-user{
-  color: #FFFFFF;
+.header-bar-user {
+  color: #ffffff;
   width: 250px;
   text-align: right;
   margin: auto 0 auto 0;
@@ -31,19 +31,19 @@
   left: auto;
 }
 
-.tab-bar{
-  background-color: #E4E4E4;
+.tab-bar {
+  background-color: #e4e4e4;
   height: 50px;
   display: flex;
   flex-direction: row;
   justify-content: space-evenly;
   align-items: flex-end;
 
-  .tab-bar__btn{
+  .tab-bar__btn {
     padding: 5px 0;
     color: #707070;
     border-bottom: solid 2px transparent;
-    &--active{
+    &--active {
       padding: 5px 0;
       border-bottom: solid 2px #333333;
       color: #333333;

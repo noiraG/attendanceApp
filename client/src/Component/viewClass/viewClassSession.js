@@ -10,6 +10,7 @@ import Button from "@material-ui/core/Button";
 import CreateClassSession from "../createClassSession/createClassSession";
 import DeleteIcon from "@material-ui/icons/Delete";
 import Fab from "@material-ui/core/Fab";
+import Box from "@material-ui/core/Box";
 
 export default class viewClassSession extends React.Component {
   constructor(props) {
@@ -27,78 +28,80 @@ export default class viewClassSession extends React.Component {
 
   render() {
     return (
-      <div className="attendance-container">
-        {this.state.addState ? (
-          <CreateClassSession />
-        ) : (
-          <Paper>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Class Session</TableCell>
-                  <TableCell align="right"></TableCell>
-                  <TableCell align="right"></TableCell>
-                  <TableCell align="right"></TableCell>
-                  <TableCell align="right"></TableCell>
-                  <TableCell align="right"></TableCell>
-                  <TableCell align="right"></TableCell>
-                  <TableCell align="right">
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      onClick={this.addButton}
-                    >
-                      Add Class Session
-                    </Button>
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell>Course Index</TableCell>
-                  <TableCell align="right">Class index</TableCell>
-                  <TableCell align="right">Course Name</TableCell>
-                  <TableCell align="right">Date</TableCell>
-                  <TableCell align="right">Starting Time</TableCell>
-                  <TableCell align="right">Ending Time</TableCell>
-                  <TableCell align="right">Supervisor</TableCell>
-                  <TableCell></TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {this.state.classSession.reverse().map(record => {
-                  return (
-                    <TableRow key={record.key}>
-                      <TableCell component="th" scope="row">
-                        {record.value.courseIndex}
-                      </TableCell>
-                      <TableCell align="right">
-                        {record.value.classIndex}
-                      </TableCell>
-                      <TableCell align="right">
-                        {record.value.courseName}
-                      </TableCell>
-                      <TableCell align="right">{record.value.date}</TableCell>
-                      <TableCell align="right">
-                        {record.value.startingTime}
-                      </TableCell>
-                      <TableCell align="right">
-                        {record.value.endingTime}
-                      </TableCell>
-                      <TableCell align="right">
-                        {record.value.supervisor}
-                      </TableCell>
-                      <TableCell align="center">
-                        <Fab aria-label="delete">
-                          <DeleteIcon />
-                        </Fab>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </Paper>
-        )}
-      </div>
+      <Box height="100%" style={{ backgroundColor: "#cfe8fc" }}>
+        <div className="attendance-container">
+          {this.state.addState ? (
+            <CreateClassSession />
+          ) : (
+            <Paper>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Class Session</TableCell>
+                    <TableCell align="right"></TableCell>
+                    <TableCell align="right"></TableCell>
+                    <TableCell align="right"></TableCell>
+                    <TableCell align="right"></TableCell>
+                    <TableCell align="right"></TableCell>
+                    <TableCell align="right"></TableCell>
+                    <TableCell align="right">
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={this.addButton}
+                      >
+                        Add Class Session
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>Course Index</TableCell>
+                    <TableCell align="right">Class index</TableCell>
+                    <TableCell align="right">Course Name</TableCell>
+                    <TableCell align="right">Date</TableCell>
+                    <TableCell align="right">Starting Time</TableCell>
+                    <TableCell align="right">Ending Time</TableCell>
+                    <TableCell align="right">Supervisor</TableCell>
+                    <TableCell></TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {this.state.classSession.reverse().map(record => {
+                    return (
+                      <TableRow key={record.key}>
+                        <TableCell component="th" scope="row">
+                          {record.value.courseIndex}
+                        </TableCell>
+                        <TableCell align="right">
+                          {record.value.classIndex}
+                        </TableCell>
+                        <TableCell align="right">
+                          {record.value.courseName}
+                        </TableCell>
+                        <TableCell align="right">{record.value.date}</TableCell>
+                        <TableCell align="right">
+                          {record.value.startingTime}
+                        </TableCell>
+                        <TableCell align="right">
+                          {record.value.endingTime}
+                        </TableCell>
+                        <TableCell align="right">
+                          {record.value.supervisor}
+                        </TableCell>
+                        <TableCell align="center">
+                          <Fab aria-label="delete">
+                            <DeleteIcon />
+                          </Fab>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </Paper>
+          )}
+        </div>
+      </Box>
     );
   }
 
