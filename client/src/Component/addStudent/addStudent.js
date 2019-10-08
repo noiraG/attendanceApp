@@ -13,7 +13,7 @@ export default class AddStudent extends React.Component {
       name: "",
       password: "",
       descriptor: null,
-      image: null,
+      image1: null,
       showCamera: true
     };
     this.webcamRef = React.createRef();
@@ -66,7 +66,7 @@ export default class AddStudent extends React.Component {
                 screenshotFormat="image/jpeg"
                 width={500}
                 videoConstraints={{
-                  width: 500,
+                  width: 200,
                   height: 300,
                   facingMode: "user"
                 }}
@@ -75,7 +75,7 @@ export default class AddStudent extends React.Component {
               <img
                 id="photo"
                 className="student-camera__feed"
-                src={this.state.image}
+                src={this.state.image1}
               />
             )}
             {this.state.showCamera ? (
@@ -123,7 +123,7 @@ export default class AddStudent extends React.Component {
               username: "",
               password: "",
               descriptor: null,
-              image: null,
+              image1: null,
               showCamera: true
             });
             alert("Student has been added");

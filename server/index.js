@@ -16,38 +16,37 @@ const faceapi = require("face-api.js");
 var admin = require("firebase-admin");
 var serviceAccount = require("./ay2019-cz3002-alphapro-firebase-adminsdk-xw615-a870aba412");
 admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-    databaseURL: "https://ay2019-cz3002-alphapro.firebaseio.com/"
+  credential: admin.credential.cert(serviceAccount),
+  databaseURL: "https://ay2019-cz3002-alphapro.firebaseio.com/"
 });
 
 const db = admin.database();
 
-
-const asyncMiddleware = fn =>
-  (req, res, next) => {
-    Promise.resolve(fn(req, res, next))
-      .catch(next);
-  };
+const asyncMiddleware = fn => (req, res, next) => {
+  Promise.resolve(fn(req, res, next)).catch(next);
+};
 
 // creating a starting path in our database
 const ref = db.ref("ASE");
 
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(fileUpload());
-app.use(function (req, res, next) {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header(
-        "Access-Control-Allow-Headers",
-        "Origin, X-Requested-With, Content-Type, Accept"
-    );
-    next();
+app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept"
+  );
+  next();
 });
 
 var model;
 
 //login - retrieve user based on username and password
-app.post("/login", (req, res) => {
+app.post(
+  "/login",
+  asyncMiddleware(async (req, res) => {
     /* note:
           This function require the front end to POST req's body with:
           1. username
@@ -64,38 +63,42 @@ app.post("/login", (req, res) => {
           1. send back false
         */
     console.log("login");
-    ref
+    console.log(req.body.username);
+    let snapshot = await new Promise((resolve, reject) =>
+      ref
         .child("users")
         .orderByChild("username")
         .equalTo(req.body.username)
-        .once("value", function (snapshot) {
-            accountCandidates = snapshot.val();
-            if (snapshot.exists()) {
-                Object.keys(accountCandidates).forEach(k => {
-                    if (accountCandidates[k].password == req.body.password) {
-                        candidate = {
-                            referenceKey: k,
-                            name: accountCandidates[k].name,
-                            password: accountCandidates[k].password,
-                            username: accountCandidates[k].username,
-                            admin: accountCandidates[k].role == "A" ? true : false
-                        };
-                        console.log(candidate);
-                        res.send(candidate);
-                    } else {
-                        //wrong password
-                        res.send({status: false, message: "Wrong Password"});
-                    }
-                });
-            } else {
-                //user does not exist
-                res.send({status: false, message: "Wrong Username"});
-            }
-        });
-});
+        .once("value", resolve)
+    );
+    accountCandidates = snapshot.val();
+    if (snapshot.exists()) {
+      for (k in accountCandidates) {
+        console.log("account password is: ", accountCandidates[k].password);
+        console.log("req password is: ", req.body.password);
+        if (accountCandidates[k].password == req.body.password) {
+          candidate = {
+            referenceKey: k,
+            name: accountCandidates[k].name,
+            password: accountCandidates[k].password,
+            username: accountCandidates[k].username,
+            admin: accountCandidates[k].role == "A" ? true : false
+          };
+          console.log(candidate);
+          res.send(candidate);
+        } else {
+          //wrong password
+          res.send({ status: false, message: "Wrong Password" });
+        }
+      }
+    }
+  })
+);
 
 //View all student, return all students
-app.get("/api/student", (req, res) => {
+app.get(
+  "/api/student",
+  asyncMiddleware(async (req, res) => {
     /* note:
           This function require the front end to get the api:
             it will return with a list of student:
@@ -115,25 +118,29 @@ app.get("/api/student", (req, res) => {
               }
             ]
         */
-
     var studentlist = [];
-    ref.once("value", function (snapshot) {
-        var users = snapshot.val().users;
-        Object.keys(users).forEach(k => {
-            if (users[k].role == "S") {
-                studentlist.push({
-                    key: k,
-                    value: users[k]
-                });
-            }
+    let snapshot = await new Promise((resolve, reject) =>
+      ref.child("users").once("value", resolve)
+    );
+    var users = snapshot.val();
+
+    for (i in users) {
+      if (users[k].role == "S") {
+        studentlist.push({
+          key: k,
+          value: users[k]
         });
-        res.send(studentlist);
-    });
-});
+      }
+    }
+    res.send(studentlist);
+  })
+);
 
 //View 1 student, return 1 specific student
 //url need to change, include reference key
-app.post("/api/student/one", (req, res) => {
+app.post(
+  "/api/student/one",
+  asyncMiddleware(async (req, res) => {
     /* note:
           This function require the front end to POST req's body with:
             1. matriculationNo
@@ -149,75 +156,77 @@ app.post("/api/student/one", (req, res) => {
               }
             }
         */
-
-    ref
+    let snapshot = await new Promise((resolve, reject) =>
+      ref
         .child("users")
         .orderByKey()
         .equalTo(req.body.matriculationNo)
-        .once("value", function (snapshot) {
-            if (snapshot.exists()) {
-                var users = snapshot.val();
-                Object.keys(users).forEach(k => {
-                    student = {key: k, value: users[k]};
-                    res.send(student);
-                });
-            } else {
-                res.send(false);
-            }
-        });
-});
+        .once("value", resolve)
+    );
+
+    if (snapshot.exists()) {
+      var users = snapshot.val();
+      for (k in users) {
+        student = { key: k, value: users[k] };
+        res.send(student);
+      }
+    } else {
+      res.send(false);
+    }
+  })
+);
 
 //update a specific user based on the reference key
 app.post("/api/student/update", (req, res) => {
-    /* note:
-          This function require the front end to POST req's body with:
-            1. matriculationNo
-            2. name
-            3. username
-            4. password
-          If record updated, send back true
-        */
+  /* note:
+    This function require the front end to POST req's body with:
+    1. matriculationNo
+    2. name
+    3. username
+    4. password
+    If record updated, send back true
+*/
 
-    var newData = {
-        name: req.body.name,
-        username: req.body.username,
-        password: req.body.password
-    };
-    ref
-        .child("users")
-        .child(req.body.matriculationNo)
-        .update(newData)
-        .then(() => {
-            res.send(true);
-        })
-        .catch(e => {
-            res.send(e);
-        });
+  var newData = {
+    name: req.body.name,
+    username: req.body.username,
+    password: req.body.password
+  };
+  ref
+    .child("users")
+    .child(req.body.matriculationNo)
+    .update(newData)
+    .then(() => {
+      res.send(true);
+    })
+    .catch(e => {
+      res.send(e);
+    });
 });
 
 //delete a specific student account based on referenceKey
 app.post("/api/student/delete", (req, res) => {
-    /* note:
+  /* note:
           This function require the front end to POST req's body with:
             1. matriculationNo of specific student
           If record is removed, send back true
         */
 
-    ref
-        .child("users")
-        .child(req.body.matriculationNo)
-        .remove()
-        .then(() => {
-            res.send(true);
-        })
-        .catch(e => {
-            res.send(e);
-        });
+  ref
+    .child("users")
+    .child(req.body.matriculationNo)
+    .remove()
+    .then(() => {
+      res.send(true);
+    })
+    .catch(e => {
+      res.send(e);
+    });
 });
 
 //Add student account
 app.post("/api/student/add/", (req, res) => {
-    /* note:
+  /* note:
           This function require the front end to POST req's body with:
             1. matriculationNo
             2. name
@@ -229,43 +238,45 @@ app.post("/api/student/add/", (req, res) => {
             else, add the student account
               If record is added, send back true
         */
-    console.log('adding student')
-    parameterList = req.body;
-    //check if user existed
+  console.log("adding student");
+  parameterList = req.body;
+  //check if user existed
 
-    let des = Float32Array.from(Object.values(parameterList.descriptor), x => x);
-    let result = new faceapi.LabeledFaceDescriptors(
-        parameterList.matriculationNo,
-        [des]
-    );
+  let des = Float32Array.from(Object.values(parameterList.descriptor), x => x);
+  let result = new faceapi.LabeledFaceDescriptors(
+    parameterList.matriculationNo,
+    [des]
+  );
 
-    ref
-        .child("users")
-        .orderByChild("matriculationNo")
-        .equalTo(parameterList.matriculationNo)
-        .once("value", snapshot => {
-            if (snapshot.exists()) {
-                res.send(false);
-            } else {
-                /* To do: add in face photo*/
-                //add record into the firebase database
-                ref
-                    .child("users")
-                    .child(parameterList.matriculationNo)
-                    .set({
-                        name: parameterList.name,
-                        username: parameterList.username,
-                        password: parameterList.password,
-                        role: "S",
-                        descriptor: result
-                    })
-                    .then(res.send(true));
-            }
-        });
+  ref
+    .child("users")
+    .orderByChild("matriculationNo")
+    .equalTo(parameterList.matriculationNo)
+    .once("value", snapshot => {
+      if (snapshot.exists()) {
+        res.send(false);
+      } else {
+        /* To do: add in face photo*/
+        //add record into the firebase database
+        ref
+          .child("users")
+          .child(parameterList.matriculationNo)
+          .set({
+            name: parameterList.name,
+            username: parameterList.username,
+            password: parameterList.password,
+            role: "S",
+            descriptor: result
+          })
+          .then(res.send(true));
+      }
+    });
 });
 
 //View all class, return all class
-app.get("/api/class", (req, res) => {
+app.get(
+  "/api/class",
+  asyncMiddleware(async (req, res) => {
     /* note:
           This function require the front end to get the api:
             it will return with a list of class based on today date:
@@ -290,25 +301,31 @@ app.get("/api/class", (req, res) => {
         */
 
     console.log("getting class session");
+
     var classSession = [];
-    ref
+    let snapshot = await new Promise((resolve, reject) =>
+      ref
         .child("class")
         .orderByChild("date")
-        .once("value", function (snapshot) {
-            var classes = snapshot.val();
-            Object.keys(classes).forEach(k => {
-                classSession.push({
-                    key: k,
-                    value: classes[k]
-                });
-            });
-            console.log("returning class session", classSession);
-            res.send(classSession);
-        });
-});
+        .once("value", resolve)
+    );
+    var classes = snapshot.val();
+    console.log("class: ", classes);
+    for (i in classes) {
+      classSession.push({
+        key: i,
+        value: classes[i]
+      });
+    }
+    console.log("returning class session", classSession);
+    res.send(classSession);
+  })
+);
 
 //Add class session
-app.post("/api/class/add/", (req, res) => {
+app.post(
+  "/api/class/add/",
+  asyncMiddleware(async (req, res) => {
     /* note:
           This function require the front end to POST req's body with:
             1. array of student matriculationNo
@@ -323,97 +340,91 @@ app.post("/api/class/add/", (req, res) => {
             else, add the class session
               If record is added, then add attendance record of students taking the class
         */
-
+    console.log("add class called");
     incr = 0;
     parameterList = req.body.class;
     matriculationNo = req.body.matriculationNo;
     classPath = "";
+    let flag = false;
     //check if user existed
-    ref
+    let snapshot = await new Promise((resolve, reject) =>
+      ref
         .child("class")
         .orderByChild("date")
         .equalTo(moment().format("MM/DD/YYYY"))
-        .once("value", snapshot => {
-            if (snapshot.exists()) {
-                var classSession = snapshot.val();
-                Object.keys(classSession).forEach(k => {
-                    if (classSession[k].startingTime == parameterList.startingTime) {
-                        res.send(false);
-                    } else {
-                        if (
-                            classSession[k].classIndex == parameterList.classIndex &&
-                            classSession[k].courseIndex == parameterList.courseIndex
-                        ) {
-                            res.send(false);
-                        } else {
-                            (classPath = ref.child("class").push({
-                                courseIndex: parameterList.courseIndex,
-                                classIndex: parameterList.classIndex,
-                                courseName: parameterList.courseName,
-                                supervisor: parameterList.supervisor,
-                                date: moment().format("MM/DD/YYYY"),
-                                startingTime: parameterList.startingTime,
-                                endingTime: parameterList.endingTime
-                            }))
-                                .then(
-                                    matriculationNo.forEach(k => {
-                                        ref
-                                            .child("attendance")
-                                            .child(classPath.path.pieces_[2] + incr.toString())
-                                            .set({
-                                                classReferenceID: classPath.path.pieces_[2],
-                                                matriculationNo: k,
-                                                status: ""
-                                            })
-                                            .catch(e => {
-                                                console.log(e);
-                                            });
-                                        incr++;
-                                    })
-                                )
-                                .then(res.send(true))
-                                .catch(e => {
-                                    console.log(e);
-                                });
-                        }
-                    }
-                });
-            } else {
-                (classPath = ref.child("class").push({
-                    courseIndex: parameterList.courseIndex,
-                    classIndex: parameterList.classIndex,
-                    courseName: parameterList.courseName,
-                    supervisor: parameterList.supervisor,
-                    date: moment().format("MM/DD/YYYY"),
-                    startingTime: parameterList.startingTime,
-                    endingTime: parameterList.endingTime
-                }))
-                    .then(
-                        matriculationNo.forEach(k => {
-                            ref
-                                .child("attendance")
-                                .child(classPath.path.pieces_[2] + incr.toString())
-                                .set({
-                                    classReferenceID: classPath.path.pieces_[2],
-                                    matriculationNo: k,
-                                    status: ""
-                                })
-                                .catch(e => {
-                                    console.log(e);
-                                });
-                            incr++;
-                        })
-                    )
-                    .then(res.send(true))
-                    .catch(e => {
-                        console.log(e);
-                    });
-            }
+        .once("value", resolve)
+    );
+    if (snapshot.exists()) {
+      var classSession = snapshot.val();
+      console.log("class session is: ", classSession);
+
+      for (classSessionKey in classSession) {
+        if (
+          classSession[classSessionKey].startingTime ==
+            parameterList.startingTime ||
+          (classSession[classSessionKey].classIndex ==
+            parameterList.classIndex &&
+            classSession[classSessionKey].courseIndex ==
+              parameterList.courseIndex)
+        ) {
+          flag = true;
+        }
+      }
+
+      if (flag) {
+        res.send(false);
+      } else {
+        console.log("classPath getting");
+        classPath = await ref.child("class").push({
+          courseIndex: parameterList.courseIndex,
+          classIndex: parameterList.classIndex,
+          courseName: parameterList.courseName,
+          supervisor: parameterList.supervisor,
+          date: moment().format("MM/DD/YYYY"),
+          startingTime: parameterList.startingTime,
+          endingTime: parameterList.endingTime
         });
-});
+        for (matriculationKey in matriculationNo) {
+          await ref
+            .child("attendance")
+            .child(classPath.path.pieces_[2] + incr.toString())
+            .set({
+              classReferenceID: classPath.path.pieces_[2],
+              matriculationNo: matriculationNo[matriculationKey],
+              status: ""
+            });
+        }
+        res.send(true);
+      }
+    } else {
+      classPath = await ref.child("class").push({
+        courseIndex: parameterList.courseIndex,
+        classIndex: parameterList.classIndex,
+        courseName: parameterList.courseName,
+        supervisor: parameterList.supervisor,
+        date: moment().format("MM/DD/YYYY"),
+        startingTime: parameterList.startingTime,
+        endingTime: parameterList.endingTime
+      });
+      for (matriculationKey in matriculationNo) {
+        await ref
+          .child("attendance")
+          .child(classPath.path.pieces_[2] + incr.toString())
+          .set({
+            classReferenceID: classPath.path.pieces_[2],
+            matriculationNo: matriculationNo[matriculationKey],
+            status: ""
+          });
+      }
+      res.send(true);
+    }
+  })
+);
 
 //delete a specific class session based on referenceKey
-app.post("/api/class/delete", (req, res) => {
+app.post(
+  "/api/class/delete",
+  asyncMiddleware(async (req, res) => {
     /* note:
           This function require the front end to POST req's body with:
             1. referenceKey of specific class
@@ -425,24 +436,32 @@ app.post("/api/class/delete", (req, res) => {
     console.log(req.body.referenceKey);
     var i;
 
-    ref
-        .child("class")
-        .child(req.body.referenceKey)
-        .remove()
-        .then(() => {
-            for (i = 0; i < 50; i++) {
-                // console.log(req.body.referenceKey + i.toString());
-                ref
-                    .child("attendance")
-                    .child(req.body.referenceKey + i.toString())
-                    .remove();
-            }
-            res.send(true);
-        });
-});
+    await ref
+      .child("class")
+      .child(req.body.referenceKey)
+      .remove();
+
+    let snapshot = await new Promise((resolve, reject) =>
+      ref
+        .child("attendance")
+        .orderByKey.startAt(String(referenceKey))
+        .once("value", resolve)
+    );
+
+    for (i in snapshot.val()) {
+      await ref
+        .child("attendance")
+        .child(i)
+        .remove();
+    }
+    res.send(true);
+  })
+);
 
 //Retrieve attendance list based on matriculationNo of the individual
-app.post("/api/attendance/view/", (req, res) => {
+app.post(
+  "/api/attendance/view/",
+  asyncMiddleware(async (req, res) => {
     /* note:
           This function require the front end to post the api:
             1. matriculationNo
@@ -467,59 +486,57 @@ app.post("/api/attendance/view/", (req, res) => {
     matriculationNo = req.body.matriculationNo;
     let attendancelist = [];
     let convertedAttendanceList = [];
-    let counter1 = 1;
-    ref.once("value", function (snapshot) {
-        let attendance = snapshot.val().attendance;
-        Object.keys(attendance).forEach(k => {
-            if (attendance[k].matriculationNo == matriculationNo) {
-                attendancelist.push({
-                    key: k,
-                    value: attendance[k]
-                });
-            }
-        });
-        Object.keys(attendancelist).forEach(k => {
-            classkey = attendancelist[k].value.classReferenceID;
-            attendanceDetail = attendancelist[k];
-            ref
-                .child("class")
-                .orderByKey()
-                .equalTo(classkey)
-                .once("value", function (snapshot) {
-                    if (snapshot.exists()) {
-                        classDetail = snapshot.val();
 
-                        Object.keys(classDetail).forEach(k => {
-                            classDetail = classDetail[k];
-                        });
-                        console.log("class detail ", classDetail);
-                        console.log("attendance detail ", attendanceDetail);
-                        convertedAttendanceList.push({
-                            classReferenceID: attendanceDetail.value.classReferenceID,
-                            classIndex: classDetail.classIndex,
-                            courseIndex: classDetail.courseIndex,
-                            courseName: classDetail.courseName,
-                            date: classDetail.date,
-                            endingTime: classDetail.endingTime,
-                            startingTime: classDetail.startingTime,
-                            supervisor: classDetail.supervisor,
-                            attendanceReferenceID: attendanceDetail.key,
-                            status: attendanceDetail.value.status
-                        });
-                    }
-                    if (counter1 == attendancelist.length) {
-                        // console.log(convertedAttendanceList);
-                        res.send(convertedAttendanceList);
-                    }
-                    counter1++;
-                });
-        });
-    });
-});
+    let snapshot = await new Promise((resolve, reject) =>
+      ref.child("attendance").once("value", resolve)
+    );
+    let attendance = snapshot.val();
+    for (keys in attendance) {
+      if (attendance[keys].matriculationNo == matriculationNo) {
+        await attendancelist.push({ key: keys, value: attendance[keys] });
+      }
+    }
+    for (key in attendancelist) {
+      classkey = attendancelist[key].value.classReferenceID;
+      attendanceDetail = attendancelist[key];
+      let snapshot = await new Promise((resolve, reject) =>
+        ref
+          .child("class")
+          .orderByKey()
+          .equalTo(classkey)
+          .once("value", resolve)
+      );
+      console.log("attendance");
+      if (snapshot.exists()) {
+        classDetail = snapshot.val();
+        for (t in classDetail) {
+          classDetail = classDetail[t];
+          convertedAttendanceList.push({
+            classReferenceID: attendanceDetail.value.classReferenceID,
+            classIndex: classDetail.classIndex,
+            courseIndex: classDetail.courseIndex,
+            courseName: classDetail.courseName,
+            date: classDetail.date,
+            endingTime: classDetail.endingTime,
+            startingTime: classDetail.startingTime,
+            supervisor: classDetail.supervisor,
+            attendanceReferenceID: attendanceDetail.key,
+            status: attendanceDetail.value.status
+          });
+        }
+        res.send(convertedAttendanceList);
+      } else {
+        res.send(false);
+      }
+    }
+  })
+);
 
 //update attendance status to attended based on classDetail and matriculationNo of the student
-app.post("/api/attendance/update2", asyncMiddleware(async (req, res) => {
-/* note:
+app.post(
+  "/api/attendance/update2",
+  asyncMiddleware(async (req, res) => {
+    /* note:
         This function require the front end to POST req's body with:
             1. classDetail
                 a. courseIndex
@@ -532,60 +549,74 @@ app.post("/api/attendance/update2", asyncMiddleware(async (req, res) => {
                     if result is equal to matriculationNo
                         update the user 'TODAY' class attendance of the given courseIndex and classIndex
 */
-    console.log('update attendance')
-    console.log('model property: ', model)
+    console.log("update attendance");
+    console.log("model property: ", model);
     var classDetail = req.body.classDetail;
     var userDescriptor = req.body.descriptor;
     var matriculationNo = userDescriptor._label;
     console.log(matriculationNo);
     var classReferenceID = 0;
     attendanceStatus = {
-        status: "attended"
+      status: "attended"
     };
-    
-    const classSessionS = await new Promise((resolve, reject) => ref.child("class").orderByChild("date").equalTo(moment().format('MM/DD/YYYY')).once('value', resolve));
-    if(!classSessionS.exists()) {
-        // if snapshot dont exist
+
+    const classSessionS = await new Promise((resolve, reject) =>
+      ref
+        .child("class")
+        .orderByChild("date")
+        .equalTo(moment().format("MM/DD/YYYY"))
+        .once("value", resolve)
+    );
+    if (!classSessionS.exists()) {
+      // if snapshot dont exist
     }
 
     var classSession = classSessionS.val();
-    Object.keys(classSession).forEach(k => {
-        if (
-            classSession[k].courseIndex == classDetail.courseIndex &&
-            classSession[k].classIndex == classDetail.classIndex
-        ) {
-            // console.log("ID located");
-            classReferenceID = k;
-            // console.log(classReferenceID);
-        }
-    });
+    for (classKey in classSession) {
+      if (
+        classSession[classKey].courseIndex == classDetail.courseIndex &&
+        classSession[classKey].classIndex == classDetail.classIndex
+      ) {
+        // console.log("ID located");
+        classReferenceID = classKey;
+        console.log(classReferenceID);
+      }
+    }
 
     const result = await matchingFaceResult(userDescriptor, model);
 
-    console.log('result: ', result)
+    console.log("result: ", result);
     if (result == matriculationNo) {
-        //if result is correct, update the attendance record
-        console.log("updating");
-        let snapshot = await new Promise(resolve => ref.child("attendance").orderByKey().startAt(String(classReferenceID)).once("value", resolve));
-        
-        if (snapshot.exists()) {
-            studentInClass = snapshot.val();
-            Object.keys(studentInClass).forEach(async k => {
-                    if (studentInClass[k].matriculationNo == matriculationNo) {
-                        await ref.child("attendance").child(k).update(attendanceStatus);
-                        res.send(true);
-                    }
-                }
-            );
+      //if result is correct, update the attendance record
+      console.log("updating");
+      let snapshot = await new Promise(resolve =>
+        ref
+          .child("attendance")
+          .orderByKey()
+          .startAt(String(classReferenceID))
+          .once("value", resolve)
+      );
+
+      if (snapshot.exists()) {
+        studentInClass = snapshot.val();
+        for (e in studentInClass) {
+          if (studentInClass[k].matriculationNo == matriculationNo) {
+            await ref
+              .child("attendance")
+              .child(k)
+              .update(attendanceStatus);
+            res.send(true);
+          }
         }
-        else{
-            res.send(false)
-        }
-    } else {
-        //face matching result is wrong
+      } else {
         res.send(false);
+      }
+    } else {
+      //face matching result is wrong
+      res.send(false);
     }
-}));
+  })
+);
 
 // //update attendance status to attended based on classDetail and matriculationNo of the student
 // app.post("/api/attendance/update", (req, res) => {
@@ -722,9 +753,8 @@ app.post("/api/attendance/update2", asyncMiddleware(async (req, res) => {
 //         });
 // });
 
-
 app.post("/api/attendance/admin-update", (req, res) => {
-    /* note:
+  /* note:
           This function require the front end to POST req's body with:
               1. classDetail
                   a. courseIndex
@@ -734,37 +764,35 @@ app.post("/api/attendance/admin-update", (req, res) => {
                           update the user 'TODAY' class attendance of the given courseIndex and classIndex
       */
 
-    var classDetail = req.body.classDetail;
-    var matriculationNo = req.body.matriculationNo;
-    var classReferenceID = 0;
-    var counter1 = 1;
-    attendanceStatus = {
-        status: "attended"
-    };
-    ref
-        .child("attendance")
-        .orderByKey()
-        .startAt(String(classReferenceID))
-        .once("value", function (snapshot) {
-            if (snapshot.exists()) {
-                let studentInClass = snapshot.val();
-                Object.keys(studentInClass).forEach(
-                    k => {
-                        if (studentInClass[k].matriculationNo == matriculationNo) {
-                            // console.log("student attendance record: ", studentInClass[k]);
-                            ref
-                                .child("attendance")
-                                .child(k)
-                                .update(attendanceStatus)
-                                .then(res.send(true))
-                                .catch(e => {
-                                    res.send(e);
-                                });
-                        }
-                    }
-                );
-            }
+  var classDetail = req.body.classDetail;
+  var matriculationNo = req.body.matriculationNo;
+  var classReferenceID = 0;
+  var counter1 = 1;
+  attendanceStatus = {
+    status: "attended"
+  };
+  ref
+    .child("attendance")
+    .orderByKey()
+    .startAt(String(classReferenceID))
+    .once("value", function(snapshot) {
+      if (snapshot.exists()) {
+        let studentInClass = snapshot.val();
+        Object.keys(studentInClass).forEach(k => {
+          if (studentInClass[k].matriculationNo == matriculationNo) {
+            // console.log("student attendance record: ", studentInClass[k]);
+            ref
+              .child("attendance")
+              .child(k)
+              .update(attendanceStatus)
+              .then(res.send(true))
+              .catch(e => {
+                res.send(e);
+              });
+          }
         });
+      }
+    });
 });
 
 //post("/api/auth/login")
@@ -789,115 +817,75 @@ attendance
     class_reference, matriculationNo, status
 */
 
-/*
-generateModelResult = async (userDescriptor, descriptorArray) => {
-    let user = null;
-    let counter = 1;
-    const LabeledFaceDescriptors = [];
-
-    await faceapi.nets.ssdMobilenetv1.loadFromDisk("./models");
-    await faceapi.nets.faceLandmark68Net.loadFromDisk("./models");
-    await faceapi.nets.faceRecognitionNet.loadFromDisk("./models");
-
-    Object.keys(descriptorArray).forEach(k => {
-        let user_desc = descriptorArray[k]._descriptors[0];
-        user = descriptorArray[k]._label;
-        let descriptor = [];
-        Object.keys(user_desc).forEach(k => {
-            descriptor.push(user_desc[k]);
-        })
-        //   console.log(descriptor.length),
-        descriptor = new Float32Array(descriptor);
-        LabeledFaceDescriptors.push(
-            new faceapi.LabeledFaceDescriptors(user, [descriptor])
-        );
+startingProcess = async () => {
+  var globalStudentdescriptorlist = [];
+  ref
+    .child("users")
+    .once("value", function(snapshot) {
+      var users = snapshot.val();
+      Object.keys(users).forEach(k => {
+        if (users[k].role == "S") {
+          globalStudentdescriptorlist.push({
+            descriptor: users[k].descriptor
+          });
+        }
+      });
     })
-    let model = await new faceapi.FaceMatcher(LabeledFaceDescriptors, 0.6);
-    faceDescriptor = [];
-
-    //   console.log("the userDescriptor property is: ", userDescriptor);
-
-    Object.keys(userDescriptor._descriptors).forEach(k => {
-        faceDescriptor.push(userDescriptor._descriptors[k]);
+    .then(() => {
+      return generateModel(globalStudentdescriptorlist);
     });
+};
 
-    faceDescriptor = new Float32Array(faceDescriptor);
+generateModel = async descriptorArray => {
+  console.log("generating model");
+  await faceapi.nets.ssdMobilenetv1.loadFromDisk("./models");
+  await faceapi.nets.faceLandmark68Net.loadFromDisk("./models");
+  await faceapi.nets.faceRecognitionNet.loadFromDisk("./models");
 
-    let bestMatch = await model.findBestMatch(faceDescriptor);
-    detectValue = bestMatch._label.toString();
-    return detectValue;
-}*/
+  const LabeledFaceDescriptors = [];
 
-
-
-startingProcess = async () =>{
-    var globalStudentdescriptorlist = [];
-    ref.child('users').once("value", function (snapshot) {
-        var users = snapshot.val();
-        Object.keys(users).forEach(k => {
-            if (users[k].role == "S") {
-                globalStudentdescriptorlist.push({
-                    descriptor: users[k].descriptor
-                });
-            }
-        });
-    }).then(()=>{
-         return generateModel(globalStudentdescriptorlist);
-    })
-}
-
-generateModel = async (descriptorArray) =>{
-    console.log('generating model')
-    await faceapi.nets.ssdMobilenetv1.loadFromDisk("./models");
-    await faceapi.nets.faceLandmark68Net.loadFromDisk("./models");
-    await faceapi.nets.faceRecognitionNet.loadFromDisk("./models");
-
-    const LabeledFaceDescriptors = [];
-
-    // console.log('array is: ' , descriptorArray)
-    Object.keys(descriptorArray).forEach(k=>{
-        let user_descSet = descriptorArray[k].descriptor._descriptors;
-        // console.log('user_descSet is: ', user_descSet)
-        let user = descriptorArray[k].descriptor._label;
-        console.log('user matriculationNo is: ', user)
-        let user_descriptorSet = [];
-        Object.keys(user_descSet).forEach(k =>{
-            let user_desc = user_descSet[k];
-            // console.log('user_des is: ', user_desc)
-            let descriptor = [];
-            Object.keys(user_desc).forEach(k => {
-                descriptor.push(user_desc[k]);
-            })
-            descriptor = new Float32Array(descriptor);
-            user_descriptorSet.push(descriptor)
-        })
-        user_descriptorSet = new Float32Array(user_descriptorSet)
-        LabeledFaceDescriptors.push(
-            new faceapi.LabeledFaceDescriptors(user, [user_descriptorSet])
-        )
-    })
-    console.log('creating model')
-    model =  await new faceapi.FaceMatcher(LabeledFaceDescriptors, 0.6)
-    
-}
-
-matchingFaceResult = async (userDescriptor, faceCatcher)=>{
-    console.log('matching Face')
-    faceDescriptor = [];
-
-    //   console.log("the userDescriptor property is: ", userDescriptor);
-
-    Object.keys(userDescriptor._descriptors).forEach(k => {
-        faceDescriptor.push(userDescriptor._descriptors[k]);
+  // console.log('array is: ' , descriptorArray)
+  Object.keys(descriptorArray).forEach(k => {
+    let user_descSet = descriptorArray[k].descriptor._descriptors;
+    // console.log('user_descSet is: ', user_descSet)
+    let user = descriptorArray[k].descriptor._label;
+    console.log("user matriculationNo is: ", user);
+    let user_descriptorSet = [];
+    Object.keys(user_descSet).forEach(k => {
+      let user_desc = user_descSet[k];
+      // console.log('user_des is: ', user_desc)
+      let descriptor = [];
+      Object.keys(user_desc).forEach(k => {
+        descriptor.push(user_desc[k]);
+      });
+      descriptor = new Float32Array(descriptor);
+      user_descriptorSet.push(descriptor);
     });
+    user_descriptorSet = new Float32Array(user_descriptorSet);
+    LabeledFaceDescriptors.push(
+      new faceapi.LabeledFaceDescriptors(user, [user_descriptorSet])
+    );
+  });
+  console.log("creating model");
+  model = await new faceapi.FaceMatcher(LabeledFaceDescriptors, 0.6);
+};
 
-    faceDescriptor = new Float32Array(faceDescriptor);
-    console.log('faceDescriptor: ', faceDescriptor)
+matchingFaceResult = async (userDescriptor, faceCatcher) => {
+  console.log("matching Face");
+  faceDescriptor = [];
 
-    let bestMatch = await faceCatcher.findBestMatch([faceDescriptor]);
-    return bestMatch._label.toString();
-    
-}
+  //   console.log("the userDescriptor property is: ", userDescriptor);
 
-console.log('starting server preparation')
-startingProcess()
+  Object.keys(userDescriptor._descriptors).forEach(k => {
+    faceDescriptor.push(userDescriptor._descriptors[k]);
+  });
+
+  faceDescriptor = new Float32Array(faceDescriptor);
+  console.log("faceDescriptor: ", faceDescriptor);
+
+  let bestMatch = await faceCatcher.findBestMatch([faceDescriptor]);
+  return bestMatch._label.toString();
+};
+
+console.log("starting server preparation");
+startingProcess();
