@@ -1,7 +1,6 @@
 import React from "react";
 import "./styles.scss";
 import Webcam from "react-webcam";
-import canvas from "canvas";
 
 const faceapi = require("face-api.js");
 
@@ -155,14 +154,12 @@ class TakeAttendance extends React.Component {
     await faceapi.nets.faceLandmark68Net.loadFromUri("/models");
     await faceapi.nets.faceRecognitionNet.loadFromUri("/models");
     await faceapi.nets.faceExpressionNet.loadFromUri("/models");
-    // let image = document.getElementById("photo");
     let result = await faceapi
       .detectSingleFace(
         "photo1",
         new faceapi.SsdMobilenetv1Options({ minConfidence: 0.5 })
       )
       .withFaceLandmarks()
-      .withFaceExpressions()
       .withFaceDescriptor();
     console.log(result);
     return result;
