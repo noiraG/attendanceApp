@@ -568,11 +568,9 @@ app.post(
                         update the user 'TODAY' class attendance of the given courseIndex and classIndex
 */
     console.log("update attendance");
-    console.log("model property: ", model);
     var classDetail = req.body.classDetail;
     var userDescriptor = req.body.descriptor;
     var matriculationNo = userDescriptor._label;
-    console.log(matriculationNo);
     var classReferenceID = 0;
     attendanceStatus = {
       status: "attended"
@@ -597,7 +595,6 @@ app.post(
       ) {
         // console.log("ID located");
         classReferenceID = classKey;
-        console.log(classReferenceID);
       }
     }
 
@@ -618,10 +615,10 @@ app.post(
       if (snapshot.exists()) {
         studentInClass = snapshot.val();
         for (e in studentInClass) {
-          if (studentInClass[k].matriculationNo == matriculationNo) {
+          if (studentInClass[e].matriculationNo == matriculationNo) {
             await ref
               .child("attendance")
-              .child(k)
+              .child(e)
               .update(attendanceStatus);
             res.send(true);
           }
@@ -877,11 +874,12 @@ generateModel = async descriptorArray => {
         descriptor.push(user_desc[k]);
       });
       descriptor = new Float32Array(descriptor);
-      user_descriptorSet.push(descriptor);
+      user_descriptorSet.push(new Float32Array(descriptor));
     });
-    user_descriptorSet = new Float32Array(user_descriptorSet);
+    // user_descriptorSet = new Float32Array(user_descriptorSet);
+    console.log(user_descriptorSet);
     LabeledFaceDescriptors.push(
-      new faceapi.LabeledFaceDescriptors(user, [user_descriptorSet])
+      new faceapi.LabeledFaceDescriptors(user, user_descriptorSet)
     );
   });
   console.log(
@@ -890,7 +888,9 @@ generateModel = async descriptorArray => {
     " descriptor: ",
     LabeledFaceDescriptors
   );
-  model = await new faceapi.FaceMatcher(LabeledFaceDescriptors, 0.6);
+  if (LabeledFaceDescriptors.length > 0) {
+    model = await new faceapi.FaceMatcher(LabeledFaceDescriptors, 0.6);
+  }
 };
 
 matchingFaceResult = async (userDescriptor, faceCatcher) => {
@@ -899,14 +899,19 @@ matchingFaceResult = async (userDescriptor, faceCatcher) => {
 
   //   console.log("the userDescriptor property is: ", userDescriptor);
 
+  console.log("test");
   Object.keys(userDescriptor._descriptors).forEach(k => {
     faceDescriptor.push(userDescriptor._descriptors[k]);
   });
 
-  faceDescriptor = new Float32Array(faceDescriptor);
-  console.log("faceDescriptor: ", faceDescriptor);
+  console.log("test");
 
-  let bestMatch = await faceCatcher.findBestMatch([faceDescriptor]);
+  faceDescriptor = new Float32Array(faceDescriptor);
+  console.log("faceDescriptor: ", faceDescriptor.length);
+
+  console.log("faceCatch: ", faceCatcher);
+
+  let bestMatch = await faceCatcher.findBestMatch(faceDescriptor);
   return bestMatch._label.toString();
 };
 
