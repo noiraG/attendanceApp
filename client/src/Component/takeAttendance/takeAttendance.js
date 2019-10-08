@@ -44,7 +44,7 @@ class TakeAttendance extends React.Component {
             ref={this.webcamRef}
             screenshotFormat="image/jpeg"
             width={500}
-            videoConstraints={{ width: 500, height: 300, facingMode: "user" }}
+            videoConstraints={{ width: 250, height: 300, facingMode: "user" }}
           />
         ) : (
           <img id="photo1" src={this.state.image} />

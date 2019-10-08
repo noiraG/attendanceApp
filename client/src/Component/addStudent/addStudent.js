@@ -5,6 +5,8 @@ import "./styles.scss";
 
 const faceapi = require("face-api.js");
 
+var descriptorSet = [];
+
 export default class AddStudent extends React.Component {
   constructor(props) {
     super(props);
@@ -13,7 +15,7 @@ export default class AddStudent extends React.Component {
       name: "",
       password: "",
       descriptor: null,
-      image1: null,
+      image: null,
       showCamera: true
     };
     this.webcamRef = React.createRef();
@@ -56,6 +58,8 @@ export default class AddStudent extends React.Component {
               onChange={e => this.setState({ password: e.currentTarget.value })}
             />
           </div>
+
+          {/*camera 1*/}
           <div className="student-camera">
             {this.state.showCamera ? (
               <Webcam
@@ -66,7 +70,7 @@ export default class AddStudent extends React.Component {
                 screenshotFormat="image/jpeg"
                 width={500}
                 videoConstraints={{
-                  width: 200,
+                  width: 250,
                   height: 300,
                   facingMode: "user"
                 }}
@@ -75,7 +79,7 @@ export default class AddStudent extends React.Component {
               <img
                 id="photo"
                 className="student-camera__feed"
-                src={this.state.image1}
+                src={this.state.image}
               />
             )}
             {this.state.showCamera ? (
@@ -99,42 +103,81 @@ export default class AddStudent extends React.Component {
   onBtnClick = () => {
     console.log("clicked");
     const { matriculationNo, name, username, password } = this.state;
-    this.generateDescriptors()
-      .then(res => {
-        console.log(JSON.stringify(res.descriptor));
-        fetch("http://localhost:5000/api/student/add/", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            matriculationNo: matriculationNo,
-            name: name,
-            username: matriculationNo,
-            password: password,
-            descriptor: res.descriptor
-          })
-        })
-          .then(res => res.json())
-          .then(res => {
-            this.setState({
-              matriculationNo: "",
-              name: "",
-              username: "",
-              password: "",
-              descriptor: null,
-              image1: null,
-              showCamera: true
-            });
-            alert("Student has been added");
-          });
+    console.log("descriptor set: ", descriptorSet);
+    fetch("http://localhost:5000/api/student/add/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        matriculationNo: matriculationNo,
+        name: name,
+        username: matriculationNo,
+        password: password,
+        descriptor: descriptorSet
       })
-      .catch(e => alert("Photo not valid. Please retake and try again"));
+    })
+      .then(res => res.json())
+      .then(res => {
+        this.setState({
+          matriculationNo: "",
+          name: "",
+          username: "",
+          password: "",
+          descriptor: null,
+          image: null,
+          showCamera: true
+        });
+        alert("Student has been added");
+      });
   };
+
+  // onBtnClick = () => {
+  //   console.log("clicked");
+  //   const { matriculationNo, name, username, password } = this.state;
+  //   this.generateDescriptors()
+  //     .then(res => {
+  //       console.log(JSON.stringify(res.descriptor));
+  //       fetch("http://localhost:5000/api/student/add/", {
+  //         method: "POST",
+  //         headers: {
+  //           "Content-Type": "application/json"
+  //         },
+  //         body: JSON.stringify({
+  //           matriculationNo: matriculationNo,
+  //           name: name,
+  //           username: matriculationNo,
+  //           password: password,
+  //           descriptor: res.descriptor
+  //         })
+  //       })
+  //         .then(res => res.json())
+  //         .then(res => {
+  //           this.setState({
+  //             matriculationNo: "",
+  //             name: "",
+  //             username: "",
+  //             password: "",
+  //             descriptor: null,
+  //             image: null,
+  //             showCamera: true
+  //           });
+  //           alert("Student has been added");
+  //         });
+  //     })
+  //     .catch(e => alert("Photo not valid. Please retake and try again"));
+  // };
 
   webcamCapture = async () => {
     const imageSrc = this.webcamRef.current.getScreenshot();
     this.setState({ image: imageSrc, showCamera: false });
+    let result = await this.generateDescriptors();
+    console.log("checking the image descriptor");
+    if (result) {
+      console.log("descriptor stored");
+      descriptorSet.push(result);
+    }
+    this.setState({ image: null, showCamera: true });
   };
 
   generateDescriptors = async () => {
@@ -150,6 +193,7 @@ export default class AddStudent extends React.Component {
       .withFaceLandmarks()
       .withFaceExpressions()
       .withFaceDescriptor();
+
     return result;
   };
 
@@ -157,3 +201,24 @@ export default class AddStudent extends React.Component {
     this.setState({ showCamera: true });
   };
 }
+
+//   generateDescriptors = async () => {
+//     await faceapi.nets.ssdMobilenetv1.loadFromUri("/models");
+//     await faceapi.nets.faceLandmark68Net.loadFromUri("/models");
+//     await faceapi.nets.faceRecognitionNet.loadFromUri("/models");
+//     await faceapi.nets.faceExpressionNet.loadFromUri("/models");
+//     let result = await faceapi
+//       .detectSingleFace(
+//         "photo",
+//         new faceapi.SsdMobilenetv1Options({ minConfidence: 0.5 })
+//       )
+//       .withFaceLandmarks()
+//       .withFaceExpressions()
+//       .withFaceDescriptor();
+//     return result;
+//   };
+
+//   takeAnother = () => {
+//     this.setState({ showCamera: true });
+//   };
+// }
