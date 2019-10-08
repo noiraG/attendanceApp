@@ -187,6 +187,8 @@ export default class CreateClassSession extends React.Component {
       })
     })
       .then(res => res.json())
-      .then(res => console.log(res));
+      .then(res =>
+        res ? alert("class has been added") : alert("Class is not added")
+      );
   };
 }
