@@ -225,8 +225,10 @@ app.post("/api/student/delete", (req, res) => {
 });
 
 //Add student account
-app.post("/api/student/add/", (req, res) => {
-  /* note:
+app.post(
+  "/api/student/add/",
+  asyncMiddleware(async (req, res) => {
+    /* note:
           This function require the front end to POST req's body with:
             1. matriculationNo
             2. name
@@ -238,40 +240,56 @@ app.post("/api/student/add/", (req, res) => {
             else, add the student account
               If record is added, send back true
         */
-  console.log("adding student");
-  parameterList = req.body;
-  //check if user existed
+    console.log("adding student");
+    parameterList = req.body;
+    //check if user existed
+    let patchDesc = [];
 
-  let des = Float32Array.from(Object.values(parameterList.descriptor), x => x);
-  let result = new faceapi.LabeledFaceDescriptors(
-    parameterList.matriculationNo,
-    [des]
-  );
+    let descriptorSet = req.body.descriptor;
+    for (eachDesc in descriptorSet) {
+      console.log("singluar descriptor");
+      let des = Float32Array.from(
+        Object.values(descriptorSet[eachDesc].descriptor),
+        x => x
+      );
+      patchDesc.push(des);
+    }
+    console.log("patchDesc: ", patchDesc);
+    // let des = Float32Array.from(
+    //   Object.values(parameterList.descriptor),
+    //   x => x
+    // );
 
-  ref
-    .child("users")
-    .orderByChild("matriculationNo")
-    .equalTo(parameterList.matriculationNo)
-    .once("value", snapshot => {
-      if (snapshot.exists()) {
-        res.send(false);
-      } else {
-        /* To do: add in face photo*/
-        //add record into the firebase database
-        ref
-          .child("users")
-          .child(parameterList.matriculationNo)
-          .set({
-            name: parameterList.name,
-            username: parameterList.username,
-            password: parameterList.password,
-            role: "S",
-            descriptor: result
-          })
-          .then(res.send(true));
-      }
-    });
-});
+    let result = new faceapi.LabeledFaceDescriptors(
+      parameterList.matriculationNo,
+      patchDesc
+    );
+
+    ref
+      .child("users")
+      .orderByChild("matriculationNo")
+      .equalTo(parameterList.matriculationNo)
+      .once("value", snapshot => {
+        if (snapshot.exists()) {
+          res.send(false);
+        } else {
+          /* To do: add in face photo*/
+          //add record into the firebase database
+          ref
+            .child("users")
+            .child(parameterList.matriculationNo)
+            .set({
+              name: parameterList.name,
+              username: parameterList.username,
+              password: parameterList.password,
+              role: "S",
+              descriptor: result
+            })
+            .then(res.send(true));
+        }
+      });
+  })
+);
 
 //View all class, return all class
 app.get(
@@ -866,7 +884,12 @@ generateModel = async descriptorArray => {
       new faceapi.LabeledFaceDescriptors(user, [user_descriptorSet])
     );
   });
-  console.log("creating model");
+  console.log(
+    "creating model that trained against ",
+    LabeledFaceDescriptors.length,
+    " descriptor: ",
+    LabeledFaceDescriptors
+  );
   model = await new faceapi.FaceMatcher(LabeledFaceDescriptors, 0.6);
 };
 
