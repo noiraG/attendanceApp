@@ -1,6 +1,5 @@
 import React from "react";
 import Webcam from "react-webcam";
-import canvas from "canvas";
 import "./styles.scss";
 
 const faceapi = require("face-api.js");
@@ -43,13 +42,6 @@ export default class AddStudent extends React.Component {
                 this.setState({ matriculationNo: e.currentTarget.value })
               }
             />
-            {/* <div className="student-form__header">Username</div>
-            <input
-              className="student-form__input"
-              type="text"
-              value={username}
-              onChange={e => this.setState({ username: e.currentTarget.value })}
-            /> */}
             <div className="student-form__header">Password</div>
             <input
               className="student-form__input"
@@ -58,8 +50,6 @@ export default class AddStudent extends React.Component {
               onChange={e => this.setState({ password: e.currentTarget.value })}
             />
           </div>
-
-          {/*camera 1*/}
           <div className="student-camera">
             {this.state.showCamera ? (
               <Webcam
@@ -186,12 +176,8 @@ export default class AddStudent extends React.Component {
     await faceapi.nets.faceRecognitionNet.loadFromUri("/models");
     await faceapi.nets.faceExpressionNet.loadFromUri("/models");
     let result = await faceapi
-      .detectSingleFace(
-        "photo",
-        new faceapi.SsdMobilenetv1Options({ minConfidence: 0.5 })
-      )
+      .detectSingleFace("photo")
       .withFaceLandmarks()
-      .withFaceExpressions()
       .withFaceDescriptor();
 
     return result;
