@@ -1,6 +1,7 @@
 import React from "react";
 import "./styles.scss";
 import Webcam from "react-webcam";
+import Box from "@material-ui/core/Box";
 
 const faceapi = require("face-api.js");
 
@@ -21,61 +22,63 @@ class TakeAttendance extends React.Component {
   render() {
     const admin = this.props.admin;
     return (
-      <div className="attendance-container">
-        <div className="attendance-header">Input your Course Code</div>
-        <input
-          className="attendance-input"
-          type="text"
-          value={this.state.course}
-          onChange={e => this.setState({ course: e.target.value })}
-        />
-        <div className="attendance-header">Input your Class Code</div>
-        <input
-          className="attendance-input"
-          type="text"
-          value={this.state.class}
-          onChange={e => this.setState({ class: e.target.value })}
-        />
-        {!admin && this.state.showCamera ? (
-          <Webcam
-            audio={false}
-            height={300}
-            ref={this.webcamRef}
-            screenshotFormat="image/jpeg"
-            width={500}
-            videoConstraints={{ width: 250, height: 300, facingMode: "user" }}
-          />
-        ) : (
-          <img id="photo1" src={this.state.image} />
-        )}
-        {!admin &&
-          (this.state.showCamera ? (
-            <div className="camera-btn" onClick={this.webcamCapture}>
-              Take Photo
-            </div>
-          ) : (
-            <div className="camera-btn" onClick={this.takeAnother}>
-              Retake Photo
-            </div>
-          ))}
-        {admin && (
-          <div className="attendance-header">Input Student Matric No.</div>
-        )}
-        {admin && (
+      <Box height="100%" style={{ backgroundColor: "#cfe8fc" }}>
+        <div className="attendance-container">
+          <div className="attendance-header">Input your Course Code</div>
           <input
             className="attendance-input"
             type="text"
-            value={this.state.student}
-            onChange={e => this.setState({ student: e.target.value })}
+            value={this.state.course}
+            onChange={e => this.setState({ course: e.target.value })}
           />
-        )}
-        <div
-          className="attendance-btn"
-          onClick={!admin ? this.onBtnClick : this.onAdminClick}
-        >
-          Submit
+          <div className="attendance-header">Input your Class Code</div>
+          <input
+            className="attendance-input"
+            type="text"
+            value={this.state.class}
+            onChange={e => this.setState({ class: e.target.value })}
+          />
+          {!admin && this.state.showCamera ? (
+            <Webcam
+              audio={false}
+              height={300}
+              ref={this.webcamRef}
+              screenshotFormat="image/jpeg"
+              width={500}
+              videoConstraints={{ width: 250, height: 300, facingMode: "user" }}
+            />
+          ) : (
+            <img id="photo1" src={this.state.image} />
+          )}
+          {!admin &&
+            (this.state.showCamera ? (
+              <div className="camera-btn" onClick={this.webcamCapture}>
+                Take Photo
+              </div>
+            ) : (
+              <div className="camera-btn" onClick={this.takeAnother}>
+                Retake Photo
+              </div>
+            ))}
+          {admin && (
+            <div className="attendance-header">Input Student Matric No.</div>
+          )}
+          {admin && (
+            <input
+              className="attendance-input"
+              type="text"
+              value={this.state.student}
+              onChange={e => this.setState({ student: e.target.value })}
+            />
+          )}
+          <div
+            className="attendance-btn"
+            onClick={!admin ? this.onBtnClick : this.onAdminClick}
+          >
+            Submit
+          </div>
         </div>
-      </div>
+      </Box>
     );
   }
 

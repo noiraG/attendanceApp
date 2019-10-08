@@ -11,14 +11,15 @@
   display: flex;
   flex-direction: row;
   align-items: flex-start;
-  width: 100%;
+  width: auto;
   justify-content: center;
 }
 
 .student-form {
   display: flex;
   flex-direction: column;
-  width: 30%;
+  width: auto;
+  padding: 35px 0 0 0;
   align-items: center;
 
   &__header {
@@ -34,16 +35,16 @@
 
     &:focus {
       outline: none;
-      background-color: #E4E4E4;
+      background-color: #e4e4e4;
     }
   }
 
   &__btn {
     background-color: #333333;
     border: 1px solid #333333;
-    color: #FFFFFF;
+    color: #ffffff;
     border-radius: 5px;
-    margin: 30px 5px 5px 5px;
+    margin: 20px 5px 5px 5px;
     padding: 5px;
     width: 200px;
   }
@@ -57,10 +58,10 @@
   &__btn {
     background-color: #333333;
     border: 1px solid #333333;
-    color: #FFFFFF;
+    color: #ffffff;
     border-radius: 5px;
-    margin: -40px 5px 5px 5px;
-    z-index:  100;
+    margin: 5px 5px 5px;
+    z-index: 100;
     padding: 5px;
     width: 200px;
   }
