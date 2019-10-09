@@ -7,7 +7,8 @@ export default class Login extends React.Component {
     super(props);
     this.state = {
       username: "",
-      password: ""
+      password: "",
+      loadingState: false
     };
     this.onLoginClick.bind(this);
   }
@@ -35,7 +36,7 @@ export default class Login extends React.Component {
               onChange={e => this.setState({ password: e.currentTarget.value })}
             />
             <div className="login-form__btn" onClick={this.onLoginClick}>
-              Log In
+              {!this.state.loadingState ? "Log In" : "Log In In"}
             </div>
           </div>
         </div>
@@ -45,6 +46,7 @@ export default class Login extends React.Component {
 
   onLoginClick = () => {
     const { username, password } = this.state;
+    this.setState({ loadingState: true });
     fetch("http://localhost:5000/login", {
       method: "POST",
       headers: {
@@ -54,5 +56,6 @@ export default class Login extends React.Component {
     })
       .then(res => res.json())
       .then(res => this.props.onLogin(res));
+    this.setState({ loadingState: false });
   };
 }

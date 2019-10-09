@@ -411,6 +411,7 @@ app.post(
               matriculationNo: matriculationNo[matriculationKey],
               status: ""
             });
+          incr++;
         }
         res.send(true);
       }
@@ -433,6 +434,7 @@ app.post(
             matriculationNo: matriculationNo[matriculationKey],
             status: ""
           });
+        incr++;
       }
       res.send(true);
     }
@@ -524,7 +526,6 @@ app.post(
           .equalTo(classkey)
           .once("value", resolve)
       );
-      console.log("attendance");
       if (snapshot.exists()) {
         classDetail = snapshot.val();
         for (t in classDetail) {
@@ -542,11 +543,12 @@ app.post(
             status: attendanceDetail.value.status
           });
         }
-        res.send(convertedAttendanceList);
       } else {
         res.send(false);
       }
     }
+    console.log("return list");
+    res.send(convertedAttendanceList);
   })
 );
 
@@ -768,8 +770,10 @@ app.post(
 //         });
 // });
 
-app.post("/api/attendance/admin-update", (req, res) => {
-  /* note:
+app.post(
+  "/api/attendance/admin-update",
+  asyncMiddleware(async (req, res) => {
+    /* note:
           This function require the front end to POST req's body with:
               1. classDetail
                   a. courseIndex
@@ -779,36 +783,36 @@ app.post("/api/attendance/admin-update", (req, res) => {
                           update the user 'TODAY' class attendance of the given courseIndex and classIndex
       */
 
-  var classDetail = req.body.classDetail;
-  var matriculationNo = req.body.matriculationNo;
-  var classReferenceID = 0;
-  var counter1 = 1;
-  attendanceStatus = {
-    status: "attended"
-  };
-  ref
-    .child("attendance")
-    .orderByKey()
-    .startAt(String(classReferenceID))
-    .once("value", function(snapshot) {
-      if (snapshot.exists()) {
-        let studentInClass = snapshot.val();
-        Object.keys(studentInClass).forEach(k => {
-          if (studentInClass[k].matriculationNo == matriculationNo) {
-            // console.log("student attendance record: ", studentInClass[k]);
-            ref
-              .child("attendance")
-              .child(k)
-              .update(attendanceStatus)
-              .then(res.send(true))
-              .catch(e => {
-                res.send(e);
-              });
-          }
-        });
+    var classDetail = req.body.classDetail;
+    var matriculationNo = req.body.matriculationNo;
+    var classReferenceID = 0;
+    var counter1 = 1;
+    attendanceStatus = {
+      status: "attended"
+    };
+    let snapshot = await new Promise((resolve, reject) =>
+      ref
+        .child("attendance")
+        .orderByKey()
+        .startAt(String(classReferenceID))
+        .once("value", resolve)
+    );
+    if (snapshot.exists()) {
+      let studentInClass = snapshot.val();
+      for (key in studentInClass) {
+        if (studentInClass[key].matriculationNo == matriculationNo) {
+          await ref
+            .child("attendance")
+            .child(key)
+            .update(attendanceStatus);
+        }
       }
-    });
-});
+      res.send(true);
+    } else {
+      res.send(false);
+    }
+  })
+);
 
 //post("/api/auth/login")
 

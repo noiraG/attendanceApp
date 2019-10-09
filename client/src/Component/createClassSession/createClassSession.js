@@ -7,7 +7,6 @@ export default class CreateClassSession extends React.Component {
     this.state = {
       startingTime: "",
       endingTime: "",
-      date: null,
       classIndex: "",
       courseIndex: "",
       courseName: "",
@@ -21,7 +20,6 @@ export default class CreateClassSession extends React.Component {
     const {
       startingTime,
       endingTime,
-      date,
       classIndex,
       courseIndex,
       courseName,
@@ -77,15 +75,6 @@ export default class CreateClassSession extends React.Component {
                 }
               />
             </div>
-            {/* <div className="class-form__field">
-              <div className="class-form__header">Date</div>
-              <input
-                className="class-form__input"
-                type="date"
-                value={date}
-                onChange={e => this.setState({ date: e.currentTarget.value })}
-              /> 
-            </div>*/}
             <div className="class-form__field">
               <div className="class-form__header">Starting Time</div>
               <input
