@@ -14,7 +14,8 @@ class TakeAttendance extends React.Component {
       class: "",
       image: null,
       showCamera: true,
-      student: ""
+      student: "",
+      loadingState: false
     };
     this.webcamRef = React.createRef();
   }
@@ -38,18 +39,28 @@ class TakeAttendance extends React.Component {
             value={this.state.class}
             onChange={e => this.setState({ class: e.target.value })}
           />
-          {!admin && this.state.showCamera ? (
-            <Webcam
-              audio={false}
-              height={300}
-              ref={this.webcamRef}
-              screenshotFormat="image/jpeg"
-              width={500}
-              videoConstraints={{ width: 250, height: 300, facingMode: "user" }}
-            />
-          ) : (
-            <img id="photo1" src={this.state.image} />
-          )}
+          {!admin &&
+            (this.state.showCamera ? (
+              <Webcam
+                audio={false}
+                height={300}
+                ref={this.webcamRef}
+                screenshotFormat="image/jpeg"
+                width={500}
+                videoConstraints={{
+                  width: 250,
+                  height: 300,
+                  facingMode: "user"
+                }}
+              />
+            ) : (
+              <img
+                id="photo1"
+                width="250"
+                height="300"
+                src={this.state.image}
+              />
+            ))}
           {!admin &&
             (this.state.showCamera ? (
               <div className="camera-btn" onClick={this.webcamCapture}>
@@ -75,7 +86,7 @@ class TakeAttendance extends React.Component {
             className="attendance-btn"
             onClick={!admin ? this.onBtnClick : this.onAdminClick}
           >
-            Submit
+            {!this.state.loadingState ? "Submit" : "Submitting"}
           </div>
         </div>
       </Box>
@@ -84,6 +95,7 @@ class TakeAttendance extends React.Component {
 
   onBtnClick = () => {
     console.log("click");
+    this.setState({ loadingState: true });
     const { course } = this.state;
     this.generateDescriptors()
       .then(res => {
@@ -107,10 +119,12 @@ class TakeAttendance extends React.Component {
           .then(res => res.json())
           .then(res => {
             if (!res) {
+              this.setState({ loadingState: false });
               alert(
                 "Photo does not match you. Please try again or approach administrator"
               );
             } else if (res === true) {
+              this.setState({ loadingState: false });
               alert("Attendance has been recorded");
             }
           });
@@ -124,6 +138,7 @@ class TakeAttendance extends React.Component {
 
   onAdminClick = () => {
     console.log("click");
+    this.setState({ loadingState: true });
     fetch("http://localhost:5000/api/attendance/admin-update/", {
       method: "POST",
       headers: {
@@ -140,8 +155,10 @@ class TakeAttendance extends React.Component {
       .then(res => res.json())
       .then(res => {
         if (!res) {
+          this.setState({ loadingState: false });
           alert("There was an error");
         } else if (res === true) {
+          this.setState({ loadingState: false });
           alert("Attendance has been recorded");
         }
       });

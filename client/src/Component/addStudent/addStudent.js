@@ -16,7 +16,8 @@ export default class AddStudent extends React.Component {
       password: "",
       descriptor: null,
       image: null,
-      showCamera: true
+      showCamera: true,
+      loadingState: false
     };
     this.webcamRef = React.createRef();
   }
@@ -70,11 +71,15 @@ export default class AddStudent extends React.Component {
                   }}
                 />
               ) : (
-                <img
-                  id="photo"
-                  className="student-camera__feed"
-                  src={this.state.image}
-                />
+                <Box width={300} height={300}>
+                  <img
+                    id="photo"
+                    className="student-camera__feed"
+                    width="250"
+                    height="300"
+                    src={this.state.image}
+                  />
+                </Box>
               )}
               {this.state.showCamera ? (
                 <div
@@ -85,20 +90,23 @@ export default class AddStudent extends React.Component {
                 </div>
               ) : (
                 <div className="student-camera__btn" onClick={this.takeAnother}>
-                  Retake Photo
+                  Checking Photo
                 </div>
               )}
             </div>
           </div>
           <div className="student-form__btn" onClick={this.onBtnClick}>
-            Submit
+            {!this.state.loadingState ? "Submit" : "Submitting"}
           </div>
         </div>
       </Box>
     );
   }
 
-  onBtnClick = () => {
+  onBtnClick = async () => {
+    this.setState({
+      loadingState: true
+    });
     console.log("clicked");
     const { matriculationNo, name, username, password } = this.state;
     console.log("descriptor set: ", descriptorSet);
@@ -128,6 +136,9 @@ export default class AddStudent extends React.Component {
         });
         alert("Student has been added");
       });
+    this.setState({
+      loadingState: false
+    });
   };
 
   // onBtnClick = () => {
