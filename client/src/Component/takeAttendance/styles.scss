@@ -9,14 +9,16 @@
 
 .attendance-header {
   text-align: left;
+  margin-left: 20px;
 }
 
 .attendance-input {
-  width: 150px;
+  width: 250px;
+  height: 25px;
   border-radius: 5px;
+  padding-left: 2px;
   border: 1px solid #333333;
-  padding: 5px;
-  margin: 0 20px 20px 20px;
+  margin: 0px 70px 10px 15px;
 
   &:focus {
     outline: none;
@@ -29,18 +31,7 @@
   border: 1px solid #333333;
   color: #ffffff;
   border-radius: 5px;
-  margin: -40px 5px 5px 5px;
-  z-index: 100;
-  padding: 5px;
-  width: 200px;
-}
-
-.attendance-btn {
-  background-color: #333333;
-  border: 1px solid #333333;
-  color: #ffffff;
-  border-radius: 5px;
-  margin: 5px;
+  margin: -1px 50px 3px 43px;
   z-index: 100;
   padding: 5px;
   width: 200px;

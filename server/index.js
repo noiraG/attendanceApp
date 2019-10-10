@@ -453,18 +453,20 @@ app.post(
             send back true
         */
 
-    console.log(req.body.referenceKey);
+    let key = req.body.referenceKey;
+    console.log("key contain: ", key);
     var i;
 
     await ref
       .child("class")
-      .child(req.body.referenceKey)
+      .child(key)
       .remove();
 
     let snapshot = await new Promise((resolve, reject) =>
       ref
         .child("attendance")
-        .orderByKey.startAt(String(referenceKey))
+        .orderByKey()
+        .startAt(String(key))
         .once("value", resolve)
     );
 
@@ -510,6 +512,7 @@ app.post(
     let snapshot = await new Promise((resolve, reject) =>
       ref.child("attendance").once("value", resolve)
     );
+
     let attendance = snapshot.val();
     for (keys in attendance) {
       if (attendance[keys].matriculationNo == matriculationNo) {
@@ -517,6 +520,7 @@ app.post(
       }
     }
     for (key in attendancelist) {
+      console.log("key is: ", key);
       classkey = attendancelist[key].value.classReferenceID;
       attendanceDetail = attendancelist[key];
       let snapshot = await new Promise((resolve, reject) =>

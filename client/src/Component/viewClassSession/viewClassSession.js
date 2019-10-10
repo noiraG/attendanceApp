@@ -8,6 +8,7 @@ import TableRow from "@material-ui/core/TableRow";
 import Paper from "@material-ui/core/Paper";
 import Button from "@material-ui/core/Button";
 import CreateClassSession from "../createClassSession/createClassSession";
+import UpdateClassSession from "../updateClassSession/updateClassSession";
 import DeleteIcon from "@material-ui/icons/Delete";
 import Fab from "@material-ui/core/Fab";
 import Box from "@material-ui/core/Box";
@@ -17,7 +18,9 @@ export default class viewClassSession extends React.Component {
     super(props);
     this.state = {
       classSession: [],
-      addState: false
+      addState: false,
+      editState: false,
+      viewState: true
     };
     this.addButton = this.addButton.bind(this);
   }
@@ -30,9 +33,8 @@ export default class viewClassSession extends React.Component {
     return (
       <Box height="100%" style={{ backgroundColor: "#cfe8fc" }}>
         <div className="attendance-container">
-          {this.state.addState ? (
-            <CreateClassSession />
-          ) : (
+          {this.state.addState ? <CreateClassSession /> : null}
+          {this.state.viewState ? (
             <Paper>
               <Table>
                 <TableHead>
@@ -89,7 +91,10 @@ export default class viewClassSession extends React.Component {
                           {record.value.supervisor}
                         </TableCell>
                         <TableCell align="center">
-                          <Fab aria-label="delete">
+                          <Fab
+                            aria-label="delete"
+                            onClick={this.delButton.bind(this, record.key)}
+                          >
                             <DeleteIcon />
                           </Fab>
                         </TableCell>
@@ -99,7 +104,8 @@ export default class viewClassSession extends React.Component {
                 </TableBody>
               </Table>
             </Paper>
-          )}
+          ) : null}
+          {this.state.editState ? <UpdateClassSession /> : null}
         </div>
       </Box>
     );
@@ -113,26 +119,27 @@ export default class viewClassSession extends React.Component {
     console.log(this.state.addState);
   };
 
-  // delButton(referenceKey) {
-  //   console.log(referenceKey);
-  // fetch("http://localhost:5000/api/class/delete", {
-  //   method: "POST",
-  //   headers: {
-  //     "Content-Type": "application/json"
-  //   },
-  //   body: JSON.stringify({
-  //     referenceKey: "" + referenceKey
-  //   })
-  // });
-  //  }
+  async delButton(reference) {
+    console.log(reference);
+    await fetch("http://localhost:5000/api/class/delete", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        referenceKey: reference
+      })
+    });
+    this.retrieveList();
+  }
 
   async retrieveList() {
-    fetch("http://localhost:5000/api/class")
-      .then(res => res.json())
-      .then(res => {
-        this.setState({
-          classSession: res
-        });
-      });
+    let response = await fetch("http://localhost:5000/api/class");
+
+    let json = await response.json();
+
+    this.setState({
+      classSession: json
+    });
   }
 }

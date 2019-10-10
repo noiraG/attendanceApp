@@ -5,7 +5,7 @@ import { BrowserRouter as Router, Route, Redirect } from "react-router-dom";
 import TakeAttendance from "./Component/takeAttendance/takeAttendance";
 import Login from "./Component/login/login";
 import { TAB_CONSTANTS } from "./constants";
-import ViewClassSession from "./Component/viewClass/viewClassSession";
+import viewClassSession from "./Component/viewClassSession/viewClassSession";
 import AddStudent from "./Component/addStudent/addStudent";
 import ViewAttendance from "./Component/ViewAttendance/viewAttendance";
 
@@ -72,9 +72,14 @@ export default class App extends React.Component {
           />
         );
       case TAB_CONSTANTS.VIEW_ATTENDANCE:
-        return <ViewAttendance matriculationNo={this.state.referenceKey} />;
+        return (
+          <ViewAttendance
+            matriculationNo={this.state.referenceKey}
+            admin={this.state.admin}
+          />
+        );
       case TAB_CONSTANTS.VIEW_SESSION:
-        return <ViewClassSession />;
+        return <viewClassSession />;
       case TAB_CONSTANTS.ADD_STUDENT:
         return <AddStudent />;
     }

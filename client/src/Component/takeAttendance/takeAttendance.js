@@ -2,6 +2,8 @@ import React from "react";
 import "./styles.scss";
 import Webcam from "react-webcam";
 import Box from "@material-ui/core/Box";
+import Paper from "@material-ui/core/Paper";
+import Button from "@material-ui/core/Button";
 
 const faceapi = require("face-api.js");
 
@@ -25,69 +27,122 @@ class TakeAttendance extends React.Component {
     return (
       <Box height="100%" style={{ backgroundColor: "#cfe8fc" }}>
         <div className="attendance-container">
-          <div className="attendance-header">Input your Course Code</div>
-          <input
-            className="attendance-input"
-            type="text"
-            value={this.state.course}
-            onChange={e => this.setState({ course: e.target.value })}
-          />
-          <div className="attendance-header">Input your Class Code</div>
-          <input
-            className="attendance-input"
-            type="text"
-            value={this.state.class}
-            onChange={e => this.setState({ class: e.target.value })}
-          />
-          {!admin &&
-            (this.state.showCamera ? (
-              <Webcam
-                audio={false}
-                height={300}
-                ref={this.webcamRef}
-                screenshotFormat="image/jpeg"
-                width={500}
-                videoConstraints={{
-                  width: 250,
-                  height: 300,
-                  facingMode: "user"
+          {admin ? (
+            <Paper
+              style={{
+                marginTop: "10px",
+                padding: "10px 0px 50px 50px",
+                width: "350px",
+                height: "200px"
+              }}
+            >
+              <div className="attendance-header">Input your Course Code</div>
+              <input
+                className="attendance-input"
+                type="text"
+                value={this.state.course}
+                onChange={e => this.setState({ course: e.target.value })}
+              />
+              <div className="attendance-header">Input your Class Code</div>
+              <input
+                className="attendance-input"
+                type="text"
+                value={this.state.class}
+                onChange={e => this.setState({ class: e.target.value })}
+              />
+              <div className="attendance-header">Input Student Matric No.</div>
+              <input
+                className="attendance-input"
+                type="text"
+                value={this.state.student}
+                onChange={e => this.setState({ student: e.target.value })}
+              />
+
+              <Button
+                style={{
+                  margin: "10px 92px 50px 43px",
+                  padding: "5px",
+                  width: "200px"
                 }}
+                variant="contained"
+                onClick={!admin ? this.onBtnClick : this.onAdminClick}
+                color="primary"
+              >
+                {!this.state.loadingState ? "Submit" : "Submitting"}
+              </Button>
+            </Paper>
+          ) : (
+            <Paper
+              style={{
+                padding: "10px 0px 50px 50px",
+                width: "350px",
+                height: "480px"
+              }}
+            >
+              <div className="attendance-header">Input your Course Code</div>
+              <input
+                className="attendance-input"
+                type="text"
+                value={this.state.course}
+                onChange={e => this.setState({ course: e.target.value })}
               />
-            ) : (
-              <img
-                id="photo1"
-                width="250"
-                height="300"
-                src={this.state.image}
+              <div className="attendance-header">Input your Class Code</div>
+              <input
+                className="attendance-input"
+                type="text"
+                value={this.state.class}
+                onChange={e => this.setState({ class: e.target.value })}
               />
-            ))}
-          {!admin &&
-            (this.state.showCamera ? (
-              <div className="camera-btn" onClick={this.webcamCapture}>
-                Take Photo
-              </div>
-            ) : (
-              <div className="camera-btn" onClick={this.takeAnother}>
-                Retake Photo
-              </div>
-            ))}
-          {admin && (
-            <div className="attendance-header">Input Student Matric No.</div>
+              {this.state.showCamera ? (
+                <div style={{ margin: "0px 0px 0px -103px" }}>
+                  <Webcam
+                    audio={false}
+                    height={300}
+                    ref={this.webcamRef}
+                    screenshotFormat="image/jpeg"
+                    width={500}
+                    videoConstraints={{
+                      width: 250,
+                      height: 300,
+                      facingMode: "user"
+                    }}
+                  />
+                </div>
+              ) : (
+                <div style={{ margin: "0px 0px 0px -53px" }}>
+                  <img
+                    id="photo1"
+                    width="250"
+                    height="300"
+                    src={this.state.image}
+                  />
+                </div>
+              )}
+
+              {this.state.showCamera ? (
+                <div className="camera-btn" onClick={this.webcamCapture}>
+                  Take Photo
+                </div>
+              ) : (
+                <div className="camera-btn" onClick={this.takeAnother}>
+                  Retake Photo
+                </div>
+              )}
+
+              <Button
+                style={{
+                  margin: "10px 92px 50px 43px",
+                  padding: "5px",
+                  width: "200px"
+                }}
+                variant="contained"
+                onClick={!admin ? this.onBtnClick : this.onAdminClick}
+                color="primary"
+              >
+                {!this.state.loadingState ? "Submit" : "Submitting"}
+              </Button>
+            </Paper>
           )}
-          {admin && (
-            <input
-              className="attendance-input"
-              type="text"
-              value={this.state.student}
-              onChange={e => this.setState({ student: e.target.value })}
-            />
-          )}
-          <div
-            className="attendance-btn"
-            onClick={!admin ? this.onBtnClick : this.onAdminClick}
-          >
-            {!this.state.loadingState ? "Submit" : "Submitting"}
-          </div>
         </div>
       </Box>
     );

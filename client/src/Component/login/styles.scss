@@ -1,40 +1,40 @@
-.login-container{
+.login-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   padding-top: 50px;
 }
 
-.login-landing-msg{
+.login-landing-msg {
   color: #707070;
-  margin: 30px;
+  padding-bottom: 15px;
 }
 
-.login-form{
+.login-form {
   display: flex;
   flex-direction: column;
+  padding: 5px 5px 5px 5px;
 
-
-  &__header{
+  &__header {
     text-align: left;
   }
 
-  &__input{
+  &__input {
     border-radius: 5px;
     border: 1px solid #333333;
     padding: 5px;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
 
-    &:focus{
+    &:focus {
       outline: none;
-      background-color: #E4E4E4;
+      background-color: #e4e4e4;
     }
   }
 
-  &__btn{
+  &__btn {
     background-color: #333333;
     border: 1px solid #333333;
-    color: #FFFFFF;
+    color: #ffffff;
     border-radius: 5px;
     margin: 5px;
     padding: 5px;
