@@ -7,6 +7,7 @@ import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import Paper from "@material-ui/core/Paper";
 import Box from "@material-ui/core/Box";
+import Button from "@material-ui/core/Button";
 
 class ViewAttendance extends React.Component {
   constructor(props) {
@@ -14,24 +15,58 @@ class ViewAttendance extends React.Component {
     console.log(props);
     this.state = {
       attendance: [],
-      matriculationNo: props.matriculationNo
+      matriculationNo: props.matriculationNo,
+      admin: props.admin,
+      studentMat: null
     };
+    this.retrieveListAdmin = this.retrieveListAdmin.bind(this);
   }
 
   componentDidMount() {
-    this.retrieveList();
+    if (!this.state.admin) {
+      this.retrieveList();
+    }
   }
 
   render() {
+    const admin = this.props.admin;
     return (
       <Box height="100%" style={{ backgroundColor: "#cfe8fc" }}>
         <div className="attendance-container">
+          {admin ? (
+            <div>
+              <div>Enter Student Matriculation Number </div>
+              <input
+                type="text"
+                style={{
+                  borderRadius: "5px",
+                  border: "1px solid #333333",
+                  padding: "5px"
+                }}
+                value={this.state.studentMat}
+                onChange={e => this.setState({ studentMat: e.target.value })}
+              />
+              <Button
+                variant="contained"
+                onClick={this.onLoginClick}
+                color="primary"
+                style={{
+                  width: "100px",
+                  padding: "5px",
+                  margin: "20px 0px 20px 25px"
+                }}
+              >
+                Find
+              </Button>
+            </div>
+          ) : null}
           <Paper>
             <Table>
               <TableHead>
                 <TableRow>
                   <TableCell>
-                    {this.state.matriculationNo}'s attendancelist
+                    {!admin ? this.state.matriculationNo : "Student"} attendance
+                    list
                   </TableCell>
                 </TableRow>
                 <TableRow>
@@ -72,8 +107,25 @@ class ViewAttendance extends React.Component {
     );
   }
 
+  async retrieveListAdmin() {
+    fetch("http://localhost:5000/api/attendance/view/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        matriculationNo: this.state.studentMat
+      })
+    })
+      .then(res => res.json())
+      .then(res =>
+        this.setState({
+          attendance: res
+        })
+      );
+  }
+
   async retrieveList() {
-    const { course } = this.state;
     fetch("http://localhost:5000/api/attendance/view/", {
       method: "POST",
       headers: {

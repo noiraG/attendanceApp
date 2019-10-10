@@ -17,7 +17,8 @@ export default class AddStudent extends React.Component {
       descriptor: null,
       image: null,
       showCamera: true,
-      loadingState: false
+      loadingState: false,
+      imageCounter: 0
     };
     this.webcamRef = React.createRef();
   }
@@ -54,6 +55,10 @@ export default class AddStudent extends React.Component {
                   this.setState({ password: e.currentTarget.value })
                 }
               />
+              <div className="student-form__header">Photo Count</div>
+              <div className="student-form__header">
+                {this.state.imageCounter}
+              </div>
             </div>
             <div className="student-camera">
               {this.state.showCamera ? (
@@ -141,49 +146,16 @@ export default class AddStudent extends React.Component {
     });
   };
 
-  // onBtnClick = () => {
-  //   console.log("clicked");
-  //   const { matriculationNo, name, username, password } = this.state;
-  //   this.generateDescriptors()
-  //     .then(res => {
-  //       console.log(JSON.stringify(res.descriptor));
-  //       fetch("http://localhost:5000/api/student/add/", {
-  //         method: "POST",
-  //         headers: {
-  //           "Content-Type": "application/json"
-  //         },
-  //         body: JSON.stringify({
-  //           matriculationNo: matriculationNo,
-  //           name: name,
-  //           username: matriculationNo,
-  //           password: password,
-  //           descriptor: res.descriptor
-  //         })
-  //       })
-  //         .then(res => res.json())
-  //         .then(res => {
-  //           this.setState({
-  //             matriculationNo: "",
-  //             name: "",
-  //             username: "",
-  //             password: "",
-  //             descriptor: null,
-  //             image: null,
-  //             showCamera: true
-  //           });
-  //           alert("Student has been added");
-  //         });
-  //     })
-  //     .catch(e => alert("Photo not valid. Please retake and try again"));
-  // };
-
   webcamCapture = async () => {
     const imageSrc = this.webcamRef.current.getScreenshot();
+    let imageCount = this.state.imageCounter;
     this.setState({ image: imageSrc, showCamera: false });
     let result = await this.generateDescriptors();
     console.log("checking the image descriptor");
     if (result) {
       console.log("descriptor stored");
+      imageCount++;
+      this.setState({ imageCounter: imageCount });
       descriptorSet.push(result);
     }
     this.setState({ image: null, showCamera: true });
