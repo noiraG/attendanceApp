@@ -2,6 +2,8 @@ import React from "react";
 import Webcam from "react-webcam";
 import "./styles.scss";
 import Box from "@material-ui/core/Box";
+import Paper from "@material-ui/core/Paper";
+import Button from "@material-ui/core/Button";
 
 const faceapi = require("face-api.js");
 
@@ -28,81 +30,136 @@ export default class AddStudent extends React.Component {
     return (
       <Box height="100%" style={{ backgroundColor: "#cfe8fc" }}>
         <div className="student-container">
-          <div className="student-wrapper">
-            <div className="student-form">
-              <div className="student-form__header">Name</div>
-              <input
-                className="student-form__input"
-                type="text"
-                value={name}
-                onChange={e => this.setState({ name: e.currentTarget.value })}
-              />
-              <div className="student-form__header">Matriculation Number</div>
-              <input
-                className="student-form__input"
-                type="text"
-                value={matriculationNo}
-                onChange={e =>
-                  this.setState({ matriculationNo: e.currentTarget.value })
-                }
-              />
-              <div className="student-form__header">Password</div>
-              <input
-                className="student-form__input"
-                type="password"
-                value={password}
-                onChange={e =>
-                  this.setState({ password: e.currentTarget.value })
-                }
-              />
-              <div className="student-form__header">Photo Count</div>
-              <div className="student-form__header">
-                {this.state.imageCounter}
+          <Paper
+            style={{
+              marginTop: "10px",
+              padding: "10px 0px 50px 50px",
+              margin: "50px 0 0 50px",
+              width: "490px",
+              height: "400px"
+            }}
+          >
+            <div className="student-wrapper">
+              <div className="student-form" style={{ marginRight: "5px" }}>
+                <div
+                  className="student-form__header"
+                  style={{ margin: "0 110px 0 0" }}
+                >
+                  Name
+                </div>
+                <input
+                  className="student-form__input"
+                  type="text"
+                  value={name}
+                  onChange={e => this.setState({ name: e.currentTarget.value })}
+                />
+                <div className="student-form__header">Matriculation Number</div>
+                <input
+                  className="student-form__input"
+                  type="text"
+                  value={matriculationNo}
+                  onChange={e =>
+                    this.setState({ matriculationNo: e.currentTarget.value })
+                  }
+                />
+                <div
+                  className="student-form__header"
+                  style={{ margin: "0 90px 0 0" }}
+                >
+                  Password
+                </div>
+                <input
+                  className="student-form__input"
+                  type="password"
+                  value={password}
+                  onChange={e =>
+                    this.setState({ password: e.currentTarget.value })
+                  }
+                />
+                <div className="student-form__header" style={{ fontSize: 24 }}>
+                  Photo Count
+                </div>
+                <div
+                  className="student-form__header"
+                  style={{ fontSize: 30, marginTop: "10px" }}
+                >
+                  {this.state.imageCounter}
+                </div>
+              </div>
+              <div className="student-camera">
+                {this.state.showCamera ? (
+                  <Webcam
+                    className="student-camera__feed"
+                    audio={false}
+                    height={300}
+                    ref={this.webcamRef}
+                    screenshotFormat="image/jpeg"
+                    width={300}
+                    videoConstraints={{
+                      width: 250,
+                      height: 300,
+                      facingMode: "user"
+                    }}
+                  />
+                ) : (
+                  <Box width={300} height={300}>
+                    <img
+                      id="photo"
+                      className="student-camera__feed"
+                      width="250"
+                      height="300"
+                      src={this.state.image}
+                    />
+                  </Box>
+                )}
+                {this.state.showCamera ? (
+                  <Button
+                    className="student-camera__btn"
+                    style={{
+                      borderRadius: "5px",
+                      margin: "10px 50px 0px 43px",
+                      zIndex: "100",
+                      padding: "10px",
+                      width: "200px"
+                    }}
+                    variant="contained"
+                    onClick={this.webcamCapture}
+                  >
+                    Take photo
+                  </Button>
+                ) : (
+                  <Button
+                    className="student-camera__btn"
+                    style={{
+                      borderRadius: "5px",
+                      margin: "10px 50px 0px 43px",
+                      zIndex: "100",
+                      padding: "10px",
+                      width: "200px"
+                    }}
+                    variant="contained"
+                    onClick={this.takeAnother}
+                  >
+                    Checking Photo
+                  </Button>
+                )}
               </div>
             </div>
-            <div className="student-camera">
-              {this.state.showCamera ? (
-                <Webcam
-                  className="student-camera__feed"
-                  audio={false}
-                  height={300}
-                  ref={this.webcamRef}
-                  screenshotFormat="image/jpeg"
-                  width={300}
-                  videoConstraints={{
-                    width: 250,
-                    height: 300,
-                    facingMode: "user"
-                  }}
-                />
-              ) : (
-                <Box width={300} height={300}>
-                  <img
-                    id="photo"
-                    className="student-camera__feed"
-                    width="250"
-                    height="300"
-                    src={this.state.image}
-                  />
-                </Box>
-              )}
-              {this.state.showCamera ? (
-                <div
-                  className="student-camera__btn"
-                  onClick={this.webcamCapture}
-                >
-                  Take Photo
-                </div>
-              ) : (
-                <div className="student-camera__btn" onClick={this.takeAnother}>
-                  Checking Photo
-                </div>
-              )}
-            </div>
-          </div>
-          <div className="student-form__btn" onClick={this.onBtnClick}>
-            {!this.state.loadingState ? "Submit" : "Submitting"}
-          </div>
+
+            <Button
+              className="student-form__btn"
+              style={{
+                margin: "20px 92px 55px 43px",
+                padding: "5px",
+                width: "200px"
+              }}
+              variant="contained"
+              onClick={this.onBtnClick}
+              color="primary"
+            >
+              {!this.state.loadingState ? "Submit" : "Submitting"}
+            </Button>
+          </Paper>
         </div>
       </Box>
     );

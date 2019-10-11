@@ -39,13 +39,13 @@ export default class CreateClassSession extends React.Component {
       />
     ));
     return (
-      <div className="class-container">
-        <div className="class-form-wrapper">
-          <div className="class-form">
-            <div className="class-form__field">
-              <div className="class-form__header">Course Index</div>
+      <div className="class-container1">
+        <div className="class-form-wrapper1">
+          <div className="class-form1">
+            <div className="class-form1__field">
+              <div className="class-form1__header">Course Index</div>
               <input
-                className="class-form__input"
+                className="class-form1__input"
                 type="text"
                 value={courseIndex}
                 onChange={e =>
@@ -53,10 +53,10 @@ export default class CreateClassSession extends React.Component {
                 }
               />
             </div>
-            <div className="class-form__field">
-              <div className="class-form__header">Course Name</div>
+            <div className="class-form1__field">
+              <div className="class-form1__header">Course Name</div>
               <input
-                className="class-form__input"
+                className="class-form1__input"
                 type="text"
                 value={courseName}
                 onChange={e =>
@@ -64,10 +64,10 @@ export default class CreateClassSession extends React.Component {
                 }
               />
             </div>
-            <div className="class-form__field">
-              <div className="class-form__header">Class Index</div>
+            <div className="class-form1__field">
+              <div className="class-form1__header">Class Index</div>
               <input
-                className="class-form__input"
+                className="class-form1__input"
                 type="text"
                 value={classIndex}
                 onChange={e =>
@@ -75,10 +75,10 @@ export default class CreateClassSession extends React.Component {
                 }
               />
             </div>
-            <div className="class-form__field">
-              <div className="class-form__header">Starting Time</div>
+            <div className="class-form1__field">
+              <div className="class-form1__header">Starting Time</div>
               <input
-                className="class-form__input"
+                className="class-form1__input"
                 type="text"
                 value={startingTime}
                 onChange={e =>
@@ -86,10 +86,10 @@ export default class CreateClassSession extends React.Component {
                 }
               />
             </div>
-            <div className="class-form__field">
-              <div className="class-form__header">Ending Time</div>
+            <div className="class-form1__field">
+              <div className="class-form1__header">Ending Time</div>
               <input
-                className="class-form__input"
+                className="class-form1__input"
                 type="text"
                 value={endingTime}
                 onChange={e =>
@@ -97,8 +97,8 @@ export default class CreateClassSession extends React.Component {
                 }
               />
             </div>
-            <div className="class-form__field">
-              <div className="class-form__header">Supervisor</div>
+            <div className="class-form1__field">
+              <div className="class-form1__header">Supervisor</div>
               <input
                 className="class-form__input"
                 type="text"
@@ -109,15 +109,15 @@ export default class CreateClassSession extends React.Component {
               />
             </div>
           </div>
-          <div className="students-form">
-            <div className="students-form__header">Students</div>
-            <div className="students-form__list">{studentList}</div>
-            <div className="students-form__btns">
-              <div className="students-form__btn" onClick={this.onAddStudent}>
+          <div className="students-form1">
+            <div className="students-form1__header">Students</div>
+            <div className="students-form1__list">{studentList}</div>
+            <div className="students-form1__btns">
+              <div className="students-form1__btn" onClick={this.onAddStudent}>
                 +
               </div>
               <div
-                className="students-form__btn"
+                className="students-form1__btn"
                 onClick={this.onRemoveStudent}
               >
                 -
@@ -125,7 +125,7 @@ export default class CreateClassSession extends React.Component {
             </div>
           </div>
         </div>
-        <div className="class-form__btn" onClick={this.onCreateClick}>
+        <div className="class-form1__btn" onClick={this.onCreateClick}>
           Create Class
         </div>
       </div>

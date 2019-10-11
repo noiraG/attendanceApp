@@ -1,5 +1,6 @@
 import React from "react";
 import "./styles.scss";
+import Paper from "@material-ui/core/Paper";
 
 export default class UpdateClassSession extends React.Component {
   constructor(props) {
@@ -28,13 +29,20 @@ export default class UpdateClassSession extends React.Component {
       key
     } = this.state;
     return (
-      <div className="class-container">
-        <div className="class-form-wrapper">
-          <div className="class-form">
-            <div className="class-form__field">
-              <div className="class-form__header">Course Index</div>
+      <Paper
+        style={{
+          marginTop: "2px",
+          padding: "10px 0px 50px 50px",
+          width: "350px",
+          height: "450px"
+        }}
+      >
+        <div className="class-form-wrapper2">
+          <div className="class-form2">
+            <div className="class-form2__field">
+              <div className="class-form2__header">Course Index</div>
               <input
-                className="class-form__input"
+                className="class-form2__input"
                 type="text"
                 value={courseIndex}
                 onChange={e =>
@@ -42,10 +50,10 @@ export default class UpdateClassSession extends React.Component {
                 }
               />
             </div>
-            <div className="class-form__field">
-              <div className="class-form__header">Course Name</div>
+            <div className="class-form2__field">
+              <div className="class-form2__header">Course Name</div>
               <input
-                className="class-form__input"
+                className="class-form2__input"
                 type="text"
                 value={courseName}
                 onChange={e =>
@@ -53,10 +61,10 @@ export default class UpdateClassSession extends React.Component {
                 }
               />
             </div>
-            <div className="class-form__field">
-              <div className="class-form__header">Class Index</div>
+            <div className="class-form2__field">
+              <div className="class-form2__header">Class Index</div>
               <input
-                className="class-form__input"
+                className="class-form2__input"
                 type="text"
                 value={classIndex}
                 onChange={e =>
@@ -64,10 +72,10 @@ export default class UpdateClassSession extends React.Component {
                 }
               />
             </div>
-            <div className="class-form__field">
-              <div className="class-form__header">Starting Time</div>
+            <div className="class-form2__field">
+              <div className="class-form2__header">Starting Time</div>
               <input
-                className="class-form__input"
+                className="class-form2__input"
                 type="text"
                 value={startingTime}
                 onChange={e =>
@@ -75,10 +83,10 @@ export default class UpdateClassSession extends React.Component {
                 }
               />
             </div>
-            <div className="class-form__field">
-              <div className="class-form__header">Ending Time</div>
+            <div className="class-form2__field">
+              <div className="class-form2__header">Ending Time</div>
               <input
-                className="class-form__input"
+                className="class-form2__input"
                 type="text"
                 value={endingTime}
                 onChange={e =>
@@ -86,19 +94,19 @@ export default class UpdateClassSession extends React.Component {
                 }
               />
             </div>
-            <div className="class-form__field">
-              <div className="class-form__header">Date (MM/DD/YYYY)</div>
+            <div className="class-form2__field">
+              <div className="class-form2__header">Date (MM/DD/YYYY)</div>
               <input
-                className="class-form__input"
+                className="class-form2__input"
                 type="text"
                 value={date}
                 onChange={e => this.setState({ date: e.currentTarget.value })}
               />
             </div>
-            <div className="class-form__field">
-              <div className="class-form__header">Supervisor</div>
+            <div className="class-form2__field">
+              <div className="class-form2__header">Supervisor</div>
               <input
-                className="class-form__input"
+                className="class-form2__input"
                 type="text"
                 value={supervisor}
                 onChange={e =>
@@ -108,10 +116,14 @@ export default class UpdateClassSession extends React.Component {
             </div>
           </div>
         </div>
-        <div className="class-form__btn" onClick={this.onEditClick}>
+        <div
+          className="class-form2__btn"
+          onClick={this.onEditClick}
+          style={{ margin: "10px 50px 0 50px" }}
+        >
           Update
         </div>
-      </div>
+      </Paper>
     );
   }
 

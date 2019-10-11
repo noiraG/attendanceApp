@@ -42,7 +42,7 @@ export default class ViewClassSession extends React.Component {
     return (
       <Box height="100%" style={{ backgroundColor: "#cfe8fc" }}>
         <div className="attendance-container">
-          {this.state.addState ? <CreateClassSession /> : <div />}
+          {this.state.addState ? <CreateClassSession /> : null}
           {this.state.viewState ? (
             <Paper>
               <Table>
@@ -101,7 +101,10 @@ export default class ViewClassSession extends React.Component {
                         </TableCell>
                         <TableCell align="center">
                           <Fab
-                            color="secondary"
+                            style={{
+                              padding: "5px",
+                              backgroundColor: "#42f557"
+                            }}
                             aria-label="edit"
                             style={{ marginRight: "15px" }}
                             onClick={this.editButton.bind(this, record)}
@@ -109,10 +112,14 @@ export default class ViewClassSession extends React.Component {
                             <EditIcon />
                           </Fab>
                           <Fab
+                            style={{
+                              padding: "5px",
+                              backgroundColor: "#f54242"
+                            }}
                             aria-label="delete"
                             onClick={this.delButton.bind(this, record.key)}
                           >
-                            <DeleteIcon />
+                            <DeleteIcon style={{ color: "#000000" }} />
                           </Fab>
                         </TableCell>
                       </TableRow>
@@ -121,9 +128,7 @@ export default class ViewClassSession extends React.Component {
                 </TableBody>
               </Table>
             </Paper>
-          ) : (
-            <div />
-          )}
+          ) : null}
           {this.state.editState ? (
             <UpdateClassSession
               classIndex={this.state.classIndex}
@@ -135,9 +140,7 @@ export default class ViewClassSession extends React.Component {
               date={this.state.date}
               key={this.state.key}
             />
-          ) : (
-            <div />
-          )}
+          ) : null}
         </div>
       </Box>
     );

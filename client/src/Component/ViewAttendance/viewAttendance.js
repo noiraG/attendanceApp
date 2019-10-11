@@ -47,7 +47,10 @@ class ViewAttendance extends React.Component {
               />
               <Button
                 variant="contained"
-                onClick={this.retrieveListAdmin(this.state.studentMat)}
+                onClick={this.retrieveListAdmin.bind(
+                  this,
+                  this.state.studentMat
+                )}
                 color="primary"
                 style={{
                   width: "100px",
