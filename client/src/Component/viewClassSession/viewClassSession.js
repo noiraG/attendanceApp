@@ -12,15 +12,24 @@ import UpdateClassSession from "../updateClassSession/updateClassSession";
 import DeleteIcon from "@material-ui/icons/Delete";
 import Fab from "@material-ui/core/Fab";
 import Box from "@material-ui/core/Box";
+import EditIcon from "@material-ui/icons/Edit";
 
-export default class viewClassSession extends React.Component {
+export default class ViewClassSession extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       classSession: [],
       addState: false,
       editState: false,
-      viewState: true
+      viewState: true,
+      startingTime: null,
+      endingTime: null,
+      classIndex: null,
+      courseIndex: null,
+      courseName: null,
+      date: null,
+      supervisor: null,
+      key: null
     };
     this.addButton = this.addButton.bind(this);
   }
@@ -33,7 +42,7 @@ export default class viewClassSession extends React.Component {
     return (
       <Box height="100%" style={{ backgroundColor: "#cfe8fc" }}>
         <div className="attendance-container">
-          {this.state.addState ? <CreateClassSession /> : null}
+          {this.state.addState ? <CreateClassSession /> : <div />}
           {this.state.viewState ? (
             <Paper>
               <Table>
@@ -92,6 +101,14 @@ export default class viewClassSession extends React.Component {
                         </TableCell>
                         <TableCell align="center">
                           <Fab
+                            color="secondary"
+                            aria-label="edit"
+                            style={{ marginRight: "15px" }}
+                            onClick={this.editButton.bind(this, record)}
+                          >
+                            <EditIcon />
+                          </Fab>
+                          <Fab
                             aria-label="delete"
                             onClick={this.delButton.bind(this, record.key)}
                           >
@@ -104,19 +121,52 @@ export default class viewClassSession extends React.Component {
                 </TableBody>
               </Table>
             </Paper>
-          ) : null}
-          {this.state.editState ? <UpdateClassSession /> : null}
+          ) : (
+            <div />
+          )}
+          {this.state.editState ? (
+            <UpdateClassSession
+              classIndex={this.state.classIndex}
+              courseIndex={this.state.courseIndex}
+              courseName={this.state.courseName}
+              endingTime={this.state.endingTime}
+              startingTime={this.state.startingTime}
+              supervisor={this.state.supervisor}
+              date={this.state.date}
+              key={this.state.key}
+            />
+          ) : (
+            <div />
+          )}
         </div>
       </Box>
     );
   }
 
-  addButton = () => {
-    console.log(this.state.addState);
+  editButton = record => {
     this.setState({
-      addState: true
+      addState: false,
+      editState: true,
+      viewState: false,
+      classIndex: record.value.classIndex,
+      courseIndex: record.value.courseIndex,
+      courseName: record.value.courseName,
+      endingTime: record.value.endingTime,
+      startingTime: record.value.startingTime,
+      supervisor: record.value.supervisor,
+      date: record.value.date,
+      key: record.key
     });
-    console.log(this.state.addState);
+    console.log("edit button clicked: ", this.state.editState);
+  };
+
+  addButton = () => {
+    this.setState({
+      addState: true,
+      editState: false,
+      viewState: false
+    });
+    console.log("add button clicked: ", this.state.addState);
   };
 
   async delButton(reference) {

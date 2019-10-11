@@ -26,13 +26,14 @@ export default class Login extends React.Component {
               src={logo}
               width="75px"
               height="75px"
+              style={{ borderRadius: 500 }}
               alt="Cry my tear out"
             ></img>
             <div className="login-landing-msg">
               <Typography variant="h4">Log in to proceed</Typography>
             </div>
             <div className="login-form">
-              <div className="login-form__header">Username</div>
+              <div className="login-form__header">Matriculation No.</div>
               <input
                 className="login-form__input"
                 type="text"

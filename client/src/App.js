@@ -5,7 +5,7 @@ import { BrowserRouter as Router, Route, Redirect } from "react-router-dom";
 import TakeAttendance from "./Component/takeAttendance/takeAttendance";
 import Login from "./Component/login/login";
 import { TAB_CONSTANTS } from "./constants";
-import viewClassSession from "./Component/viewClassSession/viewClassSession";
+import ViewClassSession from "./Component/viewClassSession/viewClassSession";
 import AddStudent from "./Component/addStudent/addStudent";
 import ViewAttendance from "./Component/ViewAttendance/viewAttendance";
 
@@ -79,7 +79,7 @@ export default class App extends React.Component {
           />
         );
       case TAB_CONSTANTS.VIEW_SESSION:
-        return <viewClassSession />;
+        return <ViewClassSession />;
       case TAB_CONSTANTS.ADD_STUDENT:
         return <AddStudent />;
     }
