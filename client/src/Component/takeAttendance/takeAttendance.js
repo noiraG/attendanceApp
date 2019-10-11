@@ -120,18 +120,38 @@ class TakeAttendance extends React.Component {
               )}
 
               {this.state.showCamera ? (
-                <div className="camera-btn" onClick={this.webcamCapture}>
-                  Take Photo
-                </div>
+                <Button
+                  style={{
+                    borderRadius: "5px",
+                    margin: "10px 92px 0px 43px",
+                    zIndex: "100",
+                    padding: "10px",
+                    width: "200px"
+                  }}
+                  variant="contained"
+                  onClick={this.webcamCapture}
+                >
+                  Take photo
+                </Button>
               ) : (
-                <div className="camera-btn" onClick={this.takeAnother}>
+                <Button
+                  style={{
+                    borderRadius: "5px",
+                    margin: "10px 92px 0px 43px",
+                    zIndex: "100",
+                    padding: "10px",
+                    width: "200px"
+                  }}
+                  variant="contained"
+                  onClick={this.takeAnother}
+                >
                   Retake Photo
-                </div>
+                </Button>
               )}
 
               <Button
                 style={{
-                  margin: "10px 92px 50px 43px",
+                  margin: "10px 92px 55px 43px",
                   padding: "5px",
                   width: "200px"
                 }}

@@ -1,4 +1,4 @@
-.class-container {
+.class-container1 {
   box-sizing: content-box;
   padding-top: 150px;
   width: 100vw;
@@ -7,7 +7,7 @@
   align-items: center;
 }
 
-.class-form-wrapper {
+.class-form-wrapper1 {
   display: flex;
   flex-direction: row;
   align-items: flex-start;
@@ -15,7 +15,7 @@
   justify-content: space-between;
 }
 
-.class-form {
+.class-form1 {
   display: flex;
   flex-direction: column;
   width: 40%;
@@ -31,22 +31,22 @@
   }
 
   &__input {
-     width: 150px;
-     border-radius: 5px;
-     border: 1px solid #333333;
-     padding: 5px;
-     margin: 0 20px 20px 20px;
+    width: 150px;
+    border-radius: 5px;
+    border: 1px solid #333333;
+    padding: 5px;
+    margin: 0 20px 20px 20px;
 
-     &:focus {
-       outline: none;
-       background-color: #E4E4E4;
-     }
-   }
+    &:focus {
+      outline: none;
+      background-color: #e4e4e4;
+    }
+  }
 
   &__btn {
     background-color: #333333;
     border: 1px solid #333333;
-    color: #FFFFFF;
+    color: #ffffff;
     border-radius: 5px;
     margin: 5px;
     padding: 5px;
@@ -54,7 +54,7 @@
   }
 }
 
-.students-form {
+.students-form1 {
   display: flex;
   flex-direction: column;
   width: 40%;
@@ -75,7 +75,7 @@
 
     &:focus {
       outline: none;
-      background-color: #E4E4E4;
+      background-color: #e4e4e4;
     }
   }
 
@@ -85,7 +85,7 @@
     align-items: flex-start;
   }
 
-  &__btns{
+  &__btns {
     display: flex;
     flex-direction: row;
   }
@@ -93,7 +93,7 @@
   &__btn {
     background-color: #333333;
     border: 1px solid #333333;
-    color: #FFFFFF;
+    color: #ffffff;
     border-radius: 5px;
     margin: 5px;
     padding: 5px;
