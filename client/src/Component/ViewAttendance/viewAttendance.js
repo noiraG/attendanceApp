@@ -19,7 +19,6 @@ class ViewAttendance extends React.Component {
       admin: props.admin,
       studentMat: null
     };
-    this.retrieveListAdmin = this.retrieveListAdmin.bind(this);
   }
 
   componentDidMount() {
@@ -48,7 +47,7 @@ class ViewAttendance extends React.Component {
               />
               <Button
                 variant="contained"
-                onClick={this.onLoginClick}
+                onClick={this.retrieveListAdmin(this.state.studentMat)}
                 color="primary"
                 style={{
                   width: "100px",
@@ -107,14 +106,14 @@ class ViewAttendance extends React.Component {
     );
   }
 
-  async retrieveListAdmin() {
+  async retrieveListAdmin(matriculationNo) {
     fetch("http://localhost:5000/api/attendance/view/", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        matriculationNo: this.state.studentMat
+        matriculationNo: matriculationNo
       })
     })
       .then(res => res.json())

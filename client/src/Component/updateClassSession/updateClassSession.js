@@ -11,6 +11,7 @@ export default class UpdateClassSession extends React.Component {
       courseIndex: props.courseIndex,
       courseName: props.courseName,
       supervisor: props.supervisor,
+      date: props.date,
       key: props.referenceKey
     };
   }
@@ -22,21 +23,10 @@ export default class UpdateClassSession extends React.Component {
       classIndex,
       courseIndex,
       courseName,
+      date,
       supervisor,
-      studentCount,
-      students
+      key
     } = this.state;
-    const studentList = students.map((s, i) => (
-      <input
-        className="students-form__input"
-        type="text"
-        value={students[i]}
-        onChange={e => {
-          students[i] = e.currentTarget.value;
-          this.setState({ students: students });
-        }}
-      />
-    ));
     return (
       <div className="class-container">
         <div className="class-form-wrapper">
@@ -94,6 +84,15 @@ export default class UpdateClassSession extends React.Component {
                 onChange={e =>
                   this.setState({ endingTime: e.currentTarget.value })
                 }
+              />
+            </div>
+            <div className="class-form__field">
+              <div className="class-form__header">Date (MM/DD/YYYY)</div>
+              <input
+                className="class-form__input"
+                type="text"
+                value={date}
+                onChange={e => this.setState({ date: e.currentTarget.value })}
               />
             </div>
             <div className="class-form__field">
