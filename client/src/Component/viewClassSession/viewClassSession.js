@@ -79,7 +79,7 @@ export default class ViewClassSession extends React.Component {
                 <TableBody>
                   {this.state.classSession.reverse().map(record => {
                     return (
-                      <TableRow key={record.key}>
+                      <TableRow key={record.key} style={{ maxHeight: "50px" }}>
                         <TableCell component="th" scope="row">
                           {record.value.courseIndex}
                         </TableCell>
@@ -103,10 +103,12 @@ export default class ViewClassSession extends React.Component {
                           <Fab
                             style={{
                               padding: "5px",
-                              backgroundColor: "#42f557"
+                              backgroundColor: "#42f557",
+                              maxHeight: "40px",
+                              maxWidth: "40px",
+                              marginRight: "15px"
                             }}
                             aria-label="edit"
-                            style={{ marginRight: "15px" }}
                             onClick={this.editButton.bind(this, record)}
                           >
                             <EditIcon />
@@ -114,7 +116,9 @@ export default class ViewClassSession extends React.Component {
                           <Fab
                             style={{
                               padding: "5px",
-                              backgroundColor: "#f54242"
+                              backgroundColor: "#f54242",
+                              maxHeight: "40px",
+                              maxWidth: "40px"
                             }}
                             aria-label="delete"
                             onClick={this.delButton.bind(this, record.key)}

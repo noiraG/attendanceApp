@@ -4,5 +4,6 @@ export const TAB_CONSTANTS = {
   VIEW_SESSION: "View Class Session",
   UPDATE_SESSION: "Update Class Session",
   ADD_SESSION: "Add Class Session",
-  ADD_STUDENT: "Add Student"
+  VIEW_STUDENT: "View Student Account",
+  ADD_STUDENT: "Add Student Account"
 };

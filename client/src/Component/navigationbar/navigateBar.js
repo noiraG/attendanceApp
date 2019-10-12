@@ -45,11 +45,11 @@ export default class NavigationBar extends React.PureComponent {
             {this.props.admin && (
               <div
                 className={this.getTabClass(
-                  selectedTab === TAB_CONSTANTS.ADD_STUDENT
+                  selectedTab === TAB_CONSTANTS.VIEW_STUDENT
                 )}
-                onClick={setTabSelected(TAB_CONSTANTS.ADD_STUDENT)}
+                onClick={setTabSelected(TAB_CONSTANTS.VIEW_STUDENT)}
               >
-                Add Student
+                View Student Account
               </div>
             )}
           </div>

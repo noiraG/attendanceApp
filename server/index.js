@@ -123,15 +123,17 @@ app.get(
       ref.child("users").once("value", resolve)
     );
     var users = snapshot.val();
+    console.log("users: ", users);
 
     for (i in users) {
-      if (users[k].role == "S") {
+      if (users[i].role == "S") {
         studentlist.push({
-          key: k,
-          value: users[k]
+          key: i,
+          value: users[i]
         });
       }
     }
+    console.log("list of student: ", studentlist);
     res.send(studentlist);
   })
 );
