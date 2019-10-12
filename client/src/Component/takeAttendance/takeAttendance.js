@@ -12,8 +12,8 @@ class TakeAttendance extends React.Component {
     super(props);
     this.state = {
       matriculationNo: props.matriculationNo,
-      course: "",
-      class: "",
+      courseIndex: "",
+      classIndex: "",
       image: null,
       showCamera: true,
       student: "",
@@ -40,15 +40,15 @@ class TakeAttendance extends React.Component {
               <input
                 className="attendance-input"
                 type="text"
-                value={this.state.course}
-                onChange={e => this.setState({ course: e.target.value })}
+                value={this.state.courseIndex}
+                onChange={e => this.setState({ courseIndex: e.target.value })}
               />
               <div className="attendance-header">Input your Class Code</div>
               <input
                 className="attendance-input"
                 type="text"
-                value={this.state.class}
-                onChange={e => this.setState({ class: e.target.value })}
+                value={this.state.classIndex}
+                onChange={e => this.setState({ classIndex: e.target.value })}
               />
               <div className="attendance-header">Input Student Matric No.</div>
               <input
@@ -83,15 +83,15 @@ class TakeAttendance extends React.Component {
               <input
                 className="attendance-input"
                 type="text"
-                value={this.state.course}
-                onChange={e => this.setState({ course: e.target.value })}
+                value={this.state.courseIndex}
+                onChange={e => this.setState({ courseIndex: e.target.value })}
               />
               <div className="attendance-header">Input your Class Code</div>
               <input
                 className="attendance-input"
                 type="text"
-                value={this.state.class}
-                onChange={e => this.setState({ class: e.target.value })}
+                value={this.state.classIndex}
+                onChange={e => this.setState({ classIndex: e.target.value })}
               />
               {this.state.showCamera ? (
                 <div style={{ margin: "0px 0px 0px -103px" }}>
@@ -170,73 +170,100 @@ class TakeAttendance extends React.Component {
 
   onBtnClick = () => {
     console.log("click");
-    this.setState({ loadingState: true });
-    const { course } = this.state;
-    this.generateDescriptors()
-      .then(res => {
-        console.log(JSON.stringify(res.descriptor));
-        fetch("http://localhost:5000/api/attendance/update2", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            classDetail: {
-              courseIndex: this.state.course,
-              classIndex: this.state.class
-            },
-            descriptor: {
-              _descriptors: res.descriptor,
-              _label: this.state.matriculationNo
-            }
-          })
-        })
-          .then(res => res.json())
-          .then(res => {
-            if (!res) {
-              this.setState({ loadingState: false });
+    const { courseIndex, classIndex, image } = this.state;
+
+    if (courseIndex.length > 0) {
+      if (classIndex.length > 0) {
+        if (image != null) {
+          this.setState({ loadingState: true });
+          this.generateDescriptors()
+            .then(res => {
+              console.log(JSON.stringify(res.descriptor));
+              fetch("http://localhost:5000/api/attendance/update2", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                  classDetail: {
+                    courseIndex: this.state.course,
+                    classIndex: this.state.class
+                  },
+                  descriptor: {
+                    _descriptors: res.descriptor,
+                    _label: this.state.matriculationNo
+                  }
+                })
+              })
+                .then(res => res.json())
+                .then(res => {
+                  if (!res) {
+                    this.setState({ loadingState: false });
+                    alert(
+                      "Photo does not match you. Please try again or approach administrator"
+                    );
+                  } else if (res === true) {
+                    this.setState({ loadingState: false });
+                    alert("Attendance has been recorded");
+                  }
+                });
+            })
+            .catch(e =>
               alert(
-                "Photo does not match you. Please try again or approach administrator"
-              );
-            } else if (res === true) {
-              this.setState({ loadingState: false });
-              alert("Attendance has been recorded");
-            }
-          });
-      })
-      .catch(e =>
-        alert(
-          "Photo not valid. Please retake and try again or approach administrator"
-        )
-      );
+                "Photo not valid. Please retake and try again or approach administrator"
+              )
+            );
+        } else {
+          alert("Please take a photo");
+        }
+      } else {
+        alert("Please enter a valid class index.");
+      }
+    } else {
+      alert("Please enter a valid course index.");
+    }
   };
 
   onAdminClick = () => {
     console.log("click");
-    this.setState({ loadingState: true });
-    fetch("http://localhost:5000/api/attendance/admin-update/", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        classDetail: {
-          courseIndex: this.state.course,
-          classIndex: this.state.class
-        },
-        matriculationNo: this.state.student
-      })
-    })
-      .then(res => res.json())
-      .then(res => {
-        if (!res) {
-          this.setState({ loadingState: false });
-          alert("There was an error");
-        } else if (res === true) {
-          this.setState({ loadingState: false });
-          alert("Attendance has been recorded");
+    const { courseIndex, classIndex, student } = this.state;
+
+    if (courseIndex.length > 0) {
+      if (classIndex.length > 0) {
+        if (RegExp(/[A-Za-z][0-9]{7}[A-Za-z]/).test(student)) {
+          this.setState({ loadingState: true });
+          fetch("http://localhost:5000/api/attendance/admin-update/", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              classDetail: {
+                courseIndex: this.state.course,
+                classIndex: this.state.class
+              },
+              matriculationNo: this.state.student
+            })
+          })
+            .then(res => res.json())
+            .then(res => {
+              if (!res) {
+                this.setState({ loadingState: false });
+                alert("There was an error");
+              } else if (res === true) {
+                this.setState({ loadingState: false });
+                alert("Attendance has been recorded");
+              }
+            });
+        } else {
+          alert("Please enter a valid student matriculation No.");
         }
-      });
+      } else {
+        alert("Please enter a valid class index.");
+      }
+    } else {
+      alert("Please enter a valid course index.");
+    }
   };
 
   webcamCapture = async () => {

@@ -138,27 +138,77 @@ export default class UpdateClassSession extends React.Component {
       supervisor,
       students
     } = this.state;
-    fetch("http://localhost:5000/api/class/update/", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        class: {
-          startingTime: startingTime,
-          endingTime: endingTime,
-          date: date,
-          classIndex: classIndex,
-          courseIndex: courseIndex,
-          courseName: courseName,
-          supervisor: supervisor
-        },
-        matriculationNo: students
-      })
-    })
-      .then(res => res.json())
-      .then(res =>
-        res ? alert("class has been updated") : alert("Class update failed")
-      );
+
+    if (courseIndex.length > 0) {
+      if (courseName.length > 0) {
+        if (classIndex.length > 0) {
+          if (
+            RegExp(/(([0][0-9])|([1][0-9])|([2][0-3]))\:([0-5][0-9])/).test(
+              startingTime
+            )
+          ) {
+            if (
+              RegExp(/(([0][0-9])|([1][0-9])|([2][0-3]))\:([0-5][0-9])/).test(
+                endingTime
+              )
+            ) {
+              if (
+                this.getTimeAsNumberOfMinutes(startingTime) <
+                this.getTimeAsNumberOfMinutes(endingTime)
+              ) {
+                if (supervisor.length > 0) {
+                  fetch("http://localhost:5000/api/class/update/", {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                      class: {
+                        startingTime: startingTime,
+                        endingTime: endingTime,
+                        date: date,
+                        classIndex: classIndex,
+                        courseIndex: courseIndex,
+                        courseName: courseName,
+                        supervisor: supervisor
+                      },
+                      matriculationNo: students
+                    })
+                  })
+                    .then(res => res.json())
+                    .then(res =>
+                      res
+                        ? alert("class has been updated")
+                        : alert("Class update failed")
+                    );
+                } else {
+                  alert("Please enter a valid supervisor.");
+                }
+              } else {
+                alert("Please check the time range and ensure it is correct.");
+              }
+            } else {
+              alert("Please enter a valid ending time - 24hr format.");
+            }
+          } else {
+            alert("Please enter a valid starting time - 24hr format.");
+          }
+        } else {
+          alert("Please enter a class index.");
+        }
+      } else {
+        alert("Please enter a course name");
+      }
+    } else {
+      alert("Please enter a course index.");
+    }
   };
+
+  getTimeAsNumberOfMinutes(time) {
+    var timeParts = time.split(":");
+
+    var timeInMinutes = timeParts[0] * 60 + timeParts[1];
+
+    return timeInMinutes;
+  }
 }

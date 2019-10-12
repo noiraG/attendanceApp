@@ -166,41 +166,57 @@ export default class AddStudent extends React.Component {
   }
 
   onBtnClick = async () => {
-    this.setState({
-      loadingState: true
-    });
-    console.log("clicked");
-    const { matriculationNo, name, username, password } = this.state;
-    console.log("descriptor set: ", descriptorSet);
-    fetch("http://localhost:5000/api/student/add/", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        matriculationNo: matriculationNo,
-        name: name,
-        username: matriculationNo,
-        password: password,
-        descriptor: descriptorSet
-      })
-    })
-      .then(res => res.json())
-      .then(res => {
-        this.setState({
-          matriculationNo: "",
-          name: "",
-          username: "",
-          password: "",
-          descriptor: null,
-          image: null,
-          showCamera: true
-        });
-        alert("Student has been added");
-      });
-    this.setState({
-      loadingState: false
-    });
+    const { matriculationNo, name, password, imageCounter } = this.state;
+    if (name.length > 1) {
+      if (RegExp(/[A-Za-z][0-9]{7}[A-Za-z]/).test(matriculationNo)) {
+        if (password.length > 1) {
+          if (imageCounter == 4) {
+            this.setState({
+              loadingState: true
+            });
+            console.log("clicked");
+
+            console.log("descriptor set: ", descriptorSet);
+            fetch("http://localhost:5000/api/student/add/", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify({
+                matriculationNo: matriculationNo,
+                name: name,
+                username: matriculationNo,
+                password: password,
+                descriptor: descriptorSet
+              })
+            })
+              .then(res => res.json())
+              .then(res => {
+                this.setState({
+                  matriculationNo: "",
+                  name: "",
+                  password: "",
+                  descriptor: null,
+                  image: null,
+                  showCamera: true
+                });
+                alert("Student has been added");
+              });
+            this.setState({
+              loadingState: false
+            });
+          } else {
+            alert("Please take more photo");
+          }
+        } else {
+          alert("Please enter a valid password");
+        }
+      } else {
+        alert("Please enter a valid matriculation No.");
+      }
+    } else {
+      alert("Please enter a valid name");
+    }
   };
 
   webcamCapture = async () => {

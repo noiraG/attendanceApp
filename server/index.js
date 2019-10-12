@@ -88,9 +88,12 @@ app.post(
           res.send(candidate);
         } else {
           //wrong password
+          console.log("false");
           res.send({ status: false, message: "Wrong Password" });
         }
       }
+    } else {
+      res.send(false);
     }
   })
 );

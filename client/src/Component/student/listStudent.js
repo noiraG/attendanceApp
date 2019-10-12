@@ -104,7 +104,13 @@ class ViewStudent extends React.Component {
                         </Fab>
                         <Fab
                           aria-label="delete"
-                          style={{ maxHeight: "40px", maxWidth: "40px" }}
+                          style={{
+                            maxHeight: "40px",
+                            maxWidth: "40px",
+                            padding: "5px",
+                            backgroundColor: "#f54242"
+                          }}
+                          onClick={this.delButton.bind(this, row.key)}
                         >
                           <DeleteIcon />
                         </Fab>
@@ -149,6 +155,20 @@ class ViewStudent extends React.Component {
     });
     console.log("add button clicked: ", this.state.addState);
   };
+
+  async delButton(reference) {
+    console.log(reference);
+    await fetch("http://localhost:5000/api/student/delete", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        referenceKey: reference
+      })
+    });
+    this.retrieveStudent();
+  }
 
   async retrieveStudent() {
     fetch("http://localhost:5000/api/student")
