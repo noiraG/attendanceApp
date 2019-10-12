@@ -32,40 +32,44 @@ export default class Login extends React.Component {
             <div className="login-landing-msg">
               <Typography variant="h4">Log in to proceed</Typography>
             </div>
-            <div className="login-form">
-              <div className="login-form__header">Matriculation No.</div>
-              <input
-                className="login-form__input"
-                type="text"
-                placeholder="your username"
-                value={this.state.username}
-                onChange={e =>
-                  this.setState({ username: e.currentTarget.value })
-                }
-              />
-              <div className="login-form__header">Password</div>
-              <input
-                className="login-form__input"
-                type="password"
-                placeholder="your password"
-                value={this.state.password}
-                onChange={e =>
-                  this.setState({ password: e.currentTarget.value })
-                }
-              />
-              <Button
-                variant="contained"
-                onClick={this.onLoginClick}
-                color="primary"
-                style={{
-                  width: "200px",
-                  padding: "5px",
-                  margin: "20px 0px 0px 25px"
-                }}
-              >
-                {!this.state.loadingState ? "Login" : "Login In"}
-              </Button>
-            </div>
+            <form onSubmit={this.handleSubmit} noValidate>
+              <div className="login-form">
+                <div className="login-form__header">Matriculation No.</div>
+                <input
+                  className="login-form__input"
+                  type="text"
+                  placeholder="your username"
+                  name="username"
+                  value={this.state.username}
+                  onChange={e =>
+                    this.setState({ username: e.currentTarget.value })
+                  }
+                />
+                <div className="login-form__header">Password</div>
+                <input
+                  className="login-form__input"
+                  type="password"
+                  name="password"
+                  placeholder="your password"
+                  value={this.state.password}
+                  onChange={e =>
+                    this.setState({ password: e.currentTarget.value })
+                  }
+                />
+                <Button
+                  variant="contained"
+                  onClick={this.onLoginClick}
+                  color="primary"
+                  style={{
+                    width: "200px",
+                    padding: "5px",
+                    margin: "20px 0px 0px 25px"
+                  }}
+                >
+                  {!this.state.loadingState ? "Login" : "Login In"}
+                </Button>
+              </div>
+            </form>
           </Paper>
         </div>
       </Box>
@@ -74,16 +78,34 @@ export default class Login extends React.Component {
 
   onLoginClick = () => {
     const { username, password } = this.state;
-    this.setState({ loadingState: true });
-    fetch("http://localhost:5000/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ username: username, password: password })
-    })
-      .then(res => res.json())
-      .then(res => this.props.onLogin(res));
-    this.setState({ loadingState: false });
+
+    if (
+      RegExp(/[A-Za-z][0-9]{7}[A-Za-z]/).test(username) ||
+      username === "admin"
+    ) {
+      console.log("username is valid");
+      if (password.length > 1) {
+        console.log("password is valid");
+        this.setState({ loadingState: true });
+        fetch("http://localhost:5000/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ username: username, password: password })
+        })
+          .then(res => res.json())
+          .then(res =>
+            res
+              ? this.props.onLogin(res)
+              : alert("Invalid username/password is entered")
+          );
+        this.setState({ loadingState: false });
+      } else {
+        alert("Please enter a password");
+      }
+    } else {
+      alert("Username is not valid");
+    }
   };
 }

@@ -1,6 +1,6 @@
 .class-container1 {
   box-sizing: content-box;
-  padding-top: 150px;
+  padding-top: 8px;
   width: 100vw;
   display: flex;
   flex-direction: column;
@@ -11,6 +11,7 @@
   display: flex;
   flex-direction: row;
   align-items: flex-start;
+  padding-top: 15px;
   width: 100%;
   justify-content: space-between;
 }
@@ -18,7 +19,7 @@
 .class-form1 {
   display: flex;
   flex-direction: column;
-  width: 40%;
+  width: 50%;
   align-items: flex-end;
 
   &__field {
@@ -31,11 +32,11 @@
   }
 
   &__input {
-    width: 150px;
+    width: 120px;
     border-radius: 5px;
     border: 1px solid #333333;
     padding: 5px;
-    margin: 0 20px 20px 20px;
+    margin: 8px 20px 20px 20px;
 
     &:focus {
       outline: none;
@@ -48,7 +49,7 @@
     border: 1px solid #333333;
     color: #ffffff;
     border-radius: 5px;
-    margin: 5px;
+    margin: 5px 250px 0 135px;
     padding: 5px;
     width: 200px;
   }
