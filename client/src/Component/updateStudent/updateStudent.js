@@ -1,6 +1,7 @@
 import React from "react";
 import "./styles.scss";
 import Paper from "@material-ui/core/Paper";
+import Button from "@material-ui/core/Button";
 
 export default class UpdateStudent extends React.Component {
   constructor(props) {
@@ -70,13 +71,15 @@ export default class UpdateStudent extends React.Component {
                   }
                 />
               </div>
-              <div
+              <Button
+                variant="contained"
                 className="class-form3__btn"
+                color="primary"
                 onClick={this.onEditClick}
                 style={{ margin: "10px 0 0 0px" }}
               >
                 Update
-              </div>
+              </Button>
             </div>
           </Paper>
         </div>

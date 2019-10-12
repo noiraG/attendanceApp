@@ -4,7 +4,7 @@ import Box from "@material-ui/core/Box";
 import Paper from "@material-ui/core/Paper";
 import Typography from "@material-ui/core/Typography";
 import Button from "@material-ui/core/Button";
-import logo from "./logo/frogs-in-packaged-salads.jpg";
+import logo from "./logo/AlphaPro_logo.png";
 
 export default class Login extends React.Component {
   constructor(props) {
@@ -24,8 +24,8 @@ export default class Login extends React.Component {
           <Paper style={{ padding: "50px 50px 70px 50px", marginTop: "100px" }}>
             <img
               src={logo}
-              width="75px"
-              height="75px"
+              width="125px"
+              height="125px"
               style={{ borderRadius: 500 }}
               alt="Cry my tear out"
             ></img>

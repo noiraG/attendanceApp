@@ -1,6 +1,7 @@
 import React from "react";
 import "./styles.scss";
 import Paper from "@material-ui/core/Paper";
+import Button from "@material-ui/core/Button";
 
 export default class UpdateClassSession extends React.Component {
   constructor(props) {
@@ -116,13 +117,15 @@ export default class UpdateClassSession extends React.Component {
             </div>
           </div>
         </div>
-        <div
+        <Button
+          variant="contained"
           className="class-form2__btn"
+          color="primary"
           onClick={this.onEditClick}
-          style={{ margin: "10px 50px 0 50px" }}
+          style={{ margin: "10px 50px 0 -15px" }}
         >
           Update
-        </div>
+        </Button>
       </Paper>
     );
   }

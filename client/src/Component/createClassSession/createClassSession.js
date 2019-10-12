@@ -1,6 +1,7 @@
 import React from "react";
 import "./styles.scss";
 import Paper from "@material-ui/core/Paper";
+import Button from "@material-ui/core/Button";
 
 export default class CreateClassSession extends React.Component {
   constructor(props) {
@@ -138,9 +139,14 @@ export default class CreateClassSession extends React.Component {
               </div>
             </div>
           </div>
-          <div className="class-form1__btn" onClick={this.onCreateClick}>
+          <Button
+            variant="contained"
+            className="class-form1__btn"
+            color="primary"
+            onClick={this.onCreateClick}
+          >
             Create Class
-          </div>
+          </Button>
         </Paper>
       </div>
     );
