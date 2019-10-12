@@ -6,7 +6,7 @@ import TakeAttendance from "./Component/takeAttendance/takeAttendance";
 import Login from "./Component/login/login";
 import { TAB_CONSTANTS } from "./constants";
 import ViewClassSession from "./Component/viewClassSession/viewClassSession";
-import AddStudent from "./Component/addStudent/addStudent";
+import ViewStudent from "./Component/student/listStudent";
 import ViewAttendance from "./Component/ViewAttendance/viewAttendance";
 
 export default class App extends React.Component {
@@ -80,8 +80,8 @@ export default class App extends React.Component {
         );
       case TAB_CONSTANTS.VIEW_SESSION:
         return <ViewClassSession />;
-      case TAB_CONSTANTS.ADD_STUDENT:
-        return <AddStudent />;
+      case TAB_CONSTANTS.VIEW_STUDENT:
+        return <ViewStudent />;
     }
   };
 

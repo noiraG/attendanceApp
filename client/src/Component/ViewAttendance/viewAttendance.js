@@ -31,7 +31,7 @@ class ViewAttendance extends React.Component {
     const admin = this.props.admin;
     return (
       <Box height="100%" style={{ backgroundColor: "#cfe8fc" }}>
-        <div className="attendance-container">
+        <div className="attendance-container1">
           {admin ? (
             <div>
               <div>Enter Student Matriculation Number </div>
