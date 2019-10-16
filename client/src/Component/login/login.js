@@ -81,7 +81,7 @@ export default class Login extends React.Component {
 
     if (
       RegExp(/[A-Za-z][0-9]{7}[A-Za-z]/).test(username) ||
-      username === "admin"
+      RegExp(/(admin)[A-Za-z0-9]*/).test(username)
     ) {
       console.log("username is valid");
       if (password.length > 1) {
@@ -96,16 +96,16 @@ export default class Login extends React.Component {
         })
           .then(res => res.json())
           .then(res =>
-            res
-              ? this.props.onLogin(res)
-              : alert("Invalid username/password is entered")
+            res.status
+              ? this.props.onLogin(res.message)
+              : alert("Invalid Matriculation No./password is entered")
           );
         this.setState({ loadingState: false });
       } else {
         alert("Please enter a password");
       }
     } else {
-      alert("Username is not valid");
+      alert("Matriculation No. is not valid");
     }
   };
 }

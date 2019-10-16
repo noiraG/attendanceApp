@@ -85,7 +85,7 @@ app.post(
             admin: accountCandidates[k].role == "A" ? true : false
           };
           console.log(candidate);
-          res.send(candidate);
+          res.send({ status: true, message: candidate });
         } else {
           //wrong password
           console.log("false");
@@ -126,7 +126,7 @@ app.get(
       ref.child("users").once("value", resolve)
     );
     var users = snapshot.val();
-    console.log("users: ", users);
+    // console.log("users: ", users);
 
     for (i in users) {
       if (users[i].role == "S") {
@@ -136,7 +136,7 @@ app.get(
         });
       }
     }
-    console.log("list of student: ", studentlist);
+    // console.log("list of student: ", studentlist);
     res.send(studentlist);
   })
 );
@@ -210,24 +210,23 @@ app.post("/api/student/update", (req, res) => {
 });
 
 //delete a specific student account based on referenceKey
-app.post("/api/student/delete", (req, res) => {
-  /* note:
+app.post(
+  "/api/student/delete",
+  asyncMiddleware(async (req, res) => {
+    /* note:
           This function require the front end to POST req's body with:
             1. matriculationNo of specific student
           If record is removed, send back true
         */
-
-  ref
-    .child("users")
-    .child(req.body.matriculationNo)
-    .remove()
-    .then(() => {
-      res.send(true);
-    })
-    .catch(e => {
-      res.send(e);
-    });
-});
+    console.log("deleting matriculationNo: ", req.body.referenceKey);
+    ref
+      .child("users")
+      .child(String(req.body.referenceKey))
+      .remove();
+    res.send(true);
+    startingProcess();
+  })
+);
 
 //Add student account
 app.post(
@@ -270,29 +269,29 @@ app.post(
       patchDesc
     );
 
-    ref
-      .child("users")
-      .orderByChild("matriculationNo")
-      .equalTo(parameterList.matriculationNo)
-      .once("value", snapshot => {
-        if (snapshot.exists()) {
-          res.send(false);
-        } else {
-          /* To do: add in face photo*/
-          //add record into the firebase database
-          ref
-            .child("users")
-            .child(parameterList.matriculationNo)
-            .set({
-              name: parameterList.name,
-              username: parameterList.username,
-              password: parameterList.password,
-              role: "S",
-              descriptor: result
-            })
-            .then(res.send(true));
-        }
-      });
+    let snapshot = await new Promise((resolve, reject) =>
+      ref
+        .child("users")
+        .orderByKey()
+        .equalTo(parameterList.matriculationNo)
+        .once("value", resolve)
+    );
+    if (snapshot.exists()) {
+      res.send(false);
+    } else {
+      await ref
+        .child("users")
+        .child(parameterList.matriculationNo)
+        .set({
+          name: parameterList.name,
+          username: parameterList.username,
+          password: parameterList.password,
+          role: "S",
+          descriptor: result
+        });
+      res.send(true);
+      // startingProcess();
+    }
   })
 );
 
@@ -446,6 +445,38 @@ app.post(
   })
 );
 
+//update a specific user based on the reference key
+app.post("/api/class/update", (req, res) => {
+  /* note:
+    This function require the front end to POST req's body with:
+    1. matriculationNo
+    2. name
+    3. username
+    4. password
+    If record updated, send back true
+*/
+  console.log(req.body);
+  var newData = {
+    startingTime: req.body.startingTime,
+    endingTime: req.body.endingTime,
+    date: req.body.date,
+    classIndex: req.body.classIndex,
+    courseIndex: req.body.courseIndex,
+    courseName: req.body.courseName,
+    supervisor: req.body.supervisor
+  };
+  ref
+    .child("class")
+    .child(String(req.body.key))
+    .update(newData)
+    .then(() => {
+      res.send(true);
+    })
+    .catch(e => {
+      res.send(false);
+    });
+});
+
 //delete a specific class session based on referenceKey
 app.post(
   "/api/class/delete",
@@ -579,6 +610,7 @@ app.post(
                         update the user 'TODAY' class attendance of the given courseIndex and classIndex
 */
     console.log("update attendance");
+    console.log("req.body is: ", req.body);
     var classDetail = req.body.classDetail;
     var userDescriptor = req.body.descriptor;
     var matriculationNo = userDescriptor._label;
@@ -596,188 +628,70 @@ app.post(
     );
     if (!classSessionS.exists()) {
       // if snapshot dont exist
-    }
-
-    var classSession = classSessionS.val();
-    for (classKey in classSession) {
-      if (
-        classSession[classKey].courseIndex == classDetail.courseIndex &&
-        classSession[classKey].classIndex == classDetail.classIndex
-      ) {
-        // console.log("ID located");
-        classReferenceID = classKey;
+      res.send(false);
+    } else {
+      var classSession = classSessionS.val();
+      for (classKey in classSession) {
+        console.log(classSession[classKey]);
+        console.log(
+          "class session course index is: ",
+          classSession[classKey].courseIndex,
+          " and submitted course index: ",
+          classDetail.courseIndex
+        );
+        if (
+          classSession[classKey].courseIndex == classDetail.courseIndex &&
+          classSession[classKey].classIndex == classDetail.classIndex
+        ) {
+          // console.log("ID located");
+          console.log("class reference ID: ", classKey);
+          classReferenceID = classKey;
+        }
       }
-    }
 
-    const result = await matchingFaceResult(userDescriptor, model);
+      if (classReferenceID != 0) {
+        const result = await matchingFaceResult(userDescriptor, model);
 
-    console.log("result: ", result);
-    if (result == matriculationNo) {
-      //if result is correct, update the attendance record
-      console.log("updating");
-      let snapshot = await new Promise(resolve =>
-        ref
-          .child("attendance")
-          .orderByKey()
-          .startAt(String(classReferenceID))
-          .once("value", resolve)
-      );
-
-      if (snapshot.exists()) {
-        studentInClass = snapshot.val();
-        for (e in studentInClass) {
-          if (studentInClass[e].matriculationNo == matriculationNo) {
-            await ref
+        console.log("result: ", result);
+        if (result == matriculationNo) {
+          //if result is correct, update the attendance record
+          console.log("updating");
+          let snapshot = await new Promise(resolve =>
+            ref
               .child("attendance")
-              .child(e)
-              .update(attendanceStatus);
-            res.send(true);
+              .orderByKey()
+              .startAt(String(classReferenceID))
+              .once("value", resolve)
+          );
+
+          if (snapshot.exists()) {
+            studentInClass = snapshot.val();
+            for (e in studentInClass) {
+              if (studentInClass[e].matriculationNo == matriculationNo) {
+                console.log("class reference ID", e);
+                console.log("classStringID: ", classReferenceID);
+                await ref
+                  .child("attendance")
+                  .child(e)
+                  .update(attendanceStatus);
+                console.log("test");
+                res.send(true);
+              }
+            }
+          } else {
+            console.log("test");
+            res.send(false);
           }
+        } else {
+          //face matching result is wrong
+          res.send(false);
         }
       } else {
         res.send(false);
       }
-    } else {
-      //face matching result is wrong
-      res.send(false);
     }
   })
 );
-
-// //update attendance status to attended based on classDetail and matriculationNo of the student
-// app.post("/api/attendance/update", (req, res) => {
-//     /* note:
-//           This function require the front end to POST req's body with:
-//               1. classDetail
-//                   a. courseIndex
-//                   b. classIndex
-//               2. descriptor
-//                   a. _descriptor
-//                   b. _label
-//           The function will search for the class session referenceKey with the 'TODAY', courseIndex and classIndex:
-//             Then search for all matriculationNo in the class session and store it in ArrayMatriculation
-//               Search for all the descriptor with the ArrayMatriculation and store each of the descriptor into Arraydescriptor
-//                   Train a model with the Arraydescriptor and matchFace using the trained model and userDescriptor
-//                       if result is equal to matriculationNo
-//                           update the user 'TODAY' class attendance of the given courseIndex and classIndex
-//       */
-
-//     var classDetail = req.body.classDetail;
-//     var userDescriptor = req.body.descriptor;
-//     var matriculationNo = userDescriptor._label;
-//     console.log(matriculationNo);
-//     var classReferenceID = 0;
-//     var counter1 = 1;
-//     var ArrayMatriculation = [];
-//     var Arraydescriptor = [];
-//     attendanceStatus = {
-//         status: "attended"
-//     };
-//     ref
-//         .child("class")
-//         .orderByChild("date")
-//         .equalTo(moment().format("MM/DD/YYYY"))
-//         .once("value", function (snapshot) {
-//             if (snapshot.exists()) {
-//                 var classSession = snapshot.val();
-//                 Object.keys(classSession).forEach(k => {
-//                     if (
-//                         classSession[k].courseIndex == classDetail.courseIndex &&
-//                         classSession[k].classIndex == classDetail.classIndex
-//                     ) {
-//                         // console.log("ID located");
-//                         classReferenceID = k;
-//                         // console.log(classReferenceID);
-
-//                         //find all the student of the class session
-//                         ref
-//                             .child("attendance")
-//                             .orderByKey()
-//                             .startAt(classReferenceID.toString())
-//                             .once("value", function (snapshot) {
-//                                 if (snapshot.exists()) {
-//                                     studentInClass = snapshot.val();
-//                                     Object.keys(studentInClass).forEach(k => {
-//                                         ArrayMatriculation.push(studentInClass[k].matriculationNo);
-//                                     }),
-//                                         //forming of the array of descriptor
-//                                         Object.keys(ArrayMatriculation).forEach(k => {
-//                                             let oneNo = ArrayMatriculation[k];
-//                                             ref
-//                                                 .child("users")
-//                                                 .orderByKey()
-//                                                 .equalTo(oneNo)
-//                                                 .once("value", function (snapshot) {
-//                                                     if (snapshot.exists()) {
-//                                                         student = snapshot.val();
-//                                                         Object.keys(student).forEach(k => {
-//                                                             Arraydescriptor.push(student[k].descriptor);
-//                                                         });
-//                                                         //cannot then after forEach, so using a simple counter to do it
-//                                                         if (counter1 == ArrayMatriculation.length) {
-//                                                             /* To Do:
-//                                                               get the then to work
-//                                                               */
-//                                                             generateModelResult(
-//                                                                 userDescriptor,
-//                                                                 Arraydescriptor
-//                                                             ).then(function (detectValue) {
-//                                                                 console.log("detectValue is: ", detectValue);
-//                                                                 if (detectValue == matriculationNo) {
-//                                                                     //if result is correct, update the attendance record
-//                                                                     console.log("updating");
-//                                                                     ref
-//                                                                         .child("attendance")
-//                                                                         .orderByKey()
-//                                                                         .startAt(String(classReferenceID))
-//                                                                         .once("value", function (snapshot) {
-//                                                                             if (snapshot.exists()) {
-//                                                                                 // console.log("2nd part using classReferenceID: ", classReferenceID);
-//                                                                                 // console.log(snapshot.val());
-//                                                                                 studentInClass = snapshot.val();
-//                                                                                 Object.keys(studentInClass).forEach(
-//                                                                                     k => {
-//                                                                                         if (
-//                                                                                             studentInClass[k]
-//                                                                                                 .matriculationNo ==
-//                                                                                             matriculationNo
-//                                                                                         ) {
-//                                                                                             // console.log("student attendance record: ", studentInClass[k]);
-//                                                                                             ref
-//                                                                                                 .child("attendance")
-//                                                                                                 .child(k)
-//                                                                                                 .update(attendanceStatus)
-//                                                                                                 .then(res.send(true))
-//                                                                                                 .catch(e => {
-//                                                                                                     res.send(e);
-//                                                                                                 });
-//                                                                                         }
-//                                                                                     }
-//                                                                                 );
-//                                                                             }
-//                                                                         });
-//                                                                 } else {
-//                                                                     //face matching result is wrong
-//                                                                     res.send(false);
-//                                                                 }
-//                                                             });
-//                                                         }
-//                                                         counter1++;
-//                                                     } else {
-//                                                         res.send(false);
-//                                                     }
-//                                                 });
-//                                         });
-//                                 }
-//                             });
-//                     }
-//                 });
-//             }
-//         })
-//         .catch(e => {
-//             res.send(e);
-//         });
-// });
 
 app.post(
   "/api/attendance/admin-update",
@@ -794,31 +708,73 @@ app.post(
 
     var classDetail = req.body.classDetail;
     var matriculationNo = req.body.matriculationNo;
+    var status = classDetail.status;
     var classReferenceID = 0;
-    var counter1 = 1;
     attendanceStatus = {
-      status: "attended"
+      status: status
     };
-    let snapshot = await new Promise((resolve, reject) =>
+
+    const classSessionS = await new Promise((resolve, reject) =>
       ref
-        .child("attendance")
-        .orderByKey()
-        .startAt(String(classReferenceID))
+        .child("class")
+        .orderByChild("date")
+        .equalTo(moment().format("MM/DD/YYYY"))
         .once("value", resolve)
     );
-    if (snapshot.exists()) {
-      let studentInClass = snapshot.val();
-      for (key in studentInClass) {
-        if (studentInClass[key].matriculationNo == matriculationNo) {
-          await ref
-            .child("attendance")
-            .child(key)
-            .update(attendanceStatus);
+    if (!classSessionS.exists()) {
+      // if snapshot dont exist
+      res.send(false);
+    } else {
+      var classSession = classSessionS.val();
+      for (classKey in classSession) {
+        console.log(classSession[classKey]);
+        console.log(
+          "class session course index is: ",
+          classSession[classKey].courseIndex,
+          " and submitted course index: ",
+          classDetail.courseIndex
+        );
+        if (
+          classSession[classKey].courseIndex == classDetail.courseIndex &&
+          classSession[classKey].classIndex == classDetail.classIndex
+        ) {
+          // console.log("ID located");
+          console.log("class reference ID: ", classKey);
+          classReferenceID = classKey;
         }
       }
-      res.send(true);
-    } else {
-      res.send(false);
+
+      if (classReferenceID != 0) {
+        console.log("updating");
+        let snapshot = await new Promise(resolve =>
+          ref
+            .child("attendance")
+            .orderByKey()
+            .startAt(String(classReferenceID))
+            .once("value", resolve)
+        );
+
+        if (snapshot.exists()) {
+          studentInClass = snapshot.val();
+          for (e in studentInClass) {
+            if (studentInClass[e].matriculationNo == matriculationNo) {
+              console.log("class reference ID", e);
+              console.log("classStringID: ", classReferenceID);
+              await ref
+                .child("attendance")
+                .child(e)
+                .update(attendanceStatus);
+              console.log("test");
+              res.send(true);
+            }
+          }
+        } else {
+          console.log("test");
+          res.send(false);
+        }
+      } else {
+        res.send(false);
+      }
     }
   })
 );

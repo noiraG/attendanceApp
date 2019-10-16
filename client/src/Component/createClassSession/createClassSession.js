@@ -227,10 +227,14 @@ export default class CreateClassSession extends React.Component {
                 alert("Please check the time range and ensure it is correct.");
               }
             } else {
-              alert("Please enter a valid ending time - 24hr format.");
+              alert(
+                "Please enter a valid ending time - 24hr format. Eg. 10:30"
+              );
             }
           } else {
-            alert("Please enter a valid starting time - 24hr format.");
+            alert(
+              "Please enter a valid starting time - 24hr format. Eg. 10:30"
+            );
           }
         } else {
           alert("Please enter a class index.");

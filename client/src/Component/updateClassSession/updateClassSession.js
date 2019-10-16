@@ -14,7 +14,7 @@ export default class UpdateClassSession extends React.Component {
       courseName: props.courseName,
       supervisor: props.supervisor,
       date: props.date,
-      key: props.referenceKey
+      key: props.key
     };
   }
 
@@ -139,7 +139,8 @@ export default class UpdateClassSession extends React.Component {
       courseIndex,
       courseName,
       supervisor,
-      students
+      students,
+      key
     } = this.state;
 
     if (courseIndex.length > 0) {
@@ -160,30 +161,28 @@ export default class UpdateClassSession extends React.Component {
                 this.getTimeAsNumberOfMinutes(endingTime)
               ) {
                 if (supervisor.length > 0) {
-                  fetch("http://localhost:5000/api/class/update/", {
+                  fetch("http://localhost:5000/api/class/update", {
                     method: "POST",
                     headers: {
                       "Content-Type": "application/json"
                     },
                     body: JSON.stringify({
-                      class: {
-                        startingTime: startingTime,
-                        endingTime: endingTime,
-                        date: date,
-                        classIndex: classIndex,
-                        courseIndex: courseIndex,
-                        courseName: courseName,
-                        supervisor: supervisor
-                      },
-                      matriculationNo: students
+                      startingTime: startingTime,
+                      endingTime: endingTime,
+                      date: date,
+                      classIndex: classIndex,
+                      courseIndex: courseIndex,
+                      courseName: courseName,
+                      supervisor: supervisor,
+                      key: key
                     })
                   })
                     .then(res => res.json())
-                    .then(res =>
+                    .then(res => {
                       res
                         ? alert("class has been updated")
-                        : alert("Class update failed")
-                    );
+                        : alert("Class update failed");
+                    });
                 } else {
                   alert("Please enter a valid supervisor.");
                 }
@@ -191,10 +190,14 @@ export default class UpdateClassSession extends React.Component {
                 alert("Please check the time range and ensure it is correct.");
               }
             } else {
-              alert("Please enter a valid ending time - 24hr format.");
+              alert(
+                "Please enter a valid ending time - 24hr format. Eg. 10:30"
+              );
             }
           } else {
-            alert("Please enter a valid starting time - 24hr format.");
+            alert(
+              "Please enter a valid starting time - 24hr format. Eg. 10:30"
+            );
           }
         } else {
           alert("Please enter a class index.");

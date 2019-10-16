@@ -192,16 +192,19 @@ export default class AddStudent extends React.Component {
             })
               .then(res => res.json())
               .then(res => {
-                this.setState({
-                  matriculationNo: "",
-                  name: "",
-                  password: "",
-                  descriptor: null,
-                  image: null,
-                  showCamera: true
-                });
-                alert("Student has been added");
+                res
+                  ? alert("Student has been added")
+                  : alert("Student has already existed");
               });
+
+            this.setState({
+              matriculationNo: "",
+              name: "",
+              password: "",
+              descriptor: null,
+              image: null,
+              showCamera: true
+            });
             this.setState({
               loadingState: false
             });

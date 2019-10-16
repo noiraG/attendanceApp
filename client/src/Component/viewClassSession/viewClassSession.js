@@ -151,6 +151,7 @@ export default class ViewClassSession extends React.Component {
   }
 
   editButton = record => {
+    console.log("record: ", record);
     this.setState({
       addState: false,
       editState: true,
