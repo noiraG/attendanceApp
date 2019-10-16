@@ -4,6 +4,8 @@ import Webcam from "react-webcam";
 import Box from "@material-ui/core/Box";
 import Paper from "@material-ui/core/Paper";
 import Button from "@material-ui/core/Button";
+import Select from "@material-ui/core/Select";
+import MenuItem from "@material-ui/core/MenuItem";
 
 const faceapi = require("face-api.js");
 
@@ -14,6 +16,7 @@ class TakeAttendance extends React.Component {
       matriculationNo: props.matriculationNo,
       courseIndex: "",
       classIndex: "",
+      status: "Attended",
       image: null,
       showCamera: true,
       student: "",
@@ -24,6 +27,13 @@ class TakeAttendance extends React.Component {
 
   render() {
     const admin = this.props.admin;
+    const handleChange = event => {
+      this.setState({
+        [event.target.name]: event.target.value
+      });
+      console.log("the current status is: ", this.state.status);
+    };
+
     return (
       <Box height="100%" style={{ backgroundColor: "#cfe8fc" }}>
         <div className="attendance-container">
@@ -33,7 +43,7 @@ class TakeAttendance extends React.Component {
                 marginTop: "10px",
                 padding: "10px 0px 50px 50px",
                 width: "350px",
-                height: "200px"
+                height: "250px"
               }}
             >
               <div className="attendance-header">Input your Course Code</div>
@@ -43,7 +53,7 @@ class TakeAttendance extends React.Component {
                 value={this.state.courseIndex}
                 onChange={e => this.setState({ courseIndex: e.target.value })}
               />
-              <div className="attendance-header">Input your Class Code</div>
+              <div className="attendance-header">Input your Class Index</div>
               <input
                 className="attendance-input"
                 type="text"
@@ -57,6 +67,18 @@ class TakeAttendance extends React.Component {
                 value={this.state.student}
                 onChange={e => this.setState({ student: e.target.value })}
               />
+
+              <Select
+                value={this.state.status}
+                onChange={handleChange}
+                name="status"
+                displayEmpty
+                style={{ margin: "0px 525px 0px 105px" }}
+              >
+                <MenuItem value={"Attended"}>Attended</MenuItem>
+                <MenuItem value={"Late"}>Late</MenuItem>
+                <MenuItem value={"MC"}>MC</MenuItem>
+              </Select>
 
               <Button
                 style={{
@@ -86,7 +108,7 @@ class TakeAttendance extends React.Component {
                 value={this.state.courseIndex}
                 onChange={e => this.setState({ courseIndex: e.target.value })}
               />
-              <div className="attendance-header">Input your Class Code</div>
+              <div className="attendance-header">Input your Class Index</div>
               <input
                 className="attendance-input"
                 type="text"
@@ -186,8 +208,8 @@ class TakeAttendance extends React.Component {
                 },
                 body: JSON.stringify({
                   classDetail: {
-                    courseIndex: this.state.course,
-                    classIndex: this.state.class
+                    courseIndex: this.state.courseIndex,
+                    classIndex: this.state.classIndex
                   },
                   descriptor: {
                     _descriptors: res.descriptor,
@@ -200,7 +222,7 @@ class TakeAttendance extends React.Component {
                   if (!res) {
                     this.setState({ loadingState: false });
                     alert(
-                      "Photo does not match you. Please try again or approach administrator"
+                      "Error occurred. Please ensure the input is valid or approach administrator for assistance."
                     );
                   } else if (res === true) {
                     this.setState({ loadingState: false });
@@ -210,11 +232,11 @@ class TakeAttendance extends React.Component {
             })
             .catch(e =>
               alert(
-                "Photo not valid. Please retake and try again or approach administrator"
+                "Photo not valid. Please retake and try again or approach administrator for assistance."
               )
             );
         } else {
-          alert("Please take a photo");
+          alert("Please take a photo.");
         }
       } else {
         alert("Please enter a valid class index.");
@@ -226,7 +248,7 @@ class TakeAttendance extends React.Component {
 
   onAdminClick = () => {
     console.log("click");
-    const { courseIndex, classIndex, student } = this.state;
+    const { courseIndex, classIndex, student, status } = this.state;
 
     if (courseIndex.length > 0) {
       if (classIndex.length > 0) {
@@ -239,8 +261,9 @@ class TakeAttendance extends React.Component {
             },
             body: JSON.stringify({
               classDetail: {
-                courseIndex: this.state.course,
-                classIndex: this.state.class
+                courseIndex: courseIndex,
+                classIndex: classIndex,
+                status: status
               },
               matriculationNo: this.state.student
             })

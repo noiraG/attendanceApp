@@ -110,21 +110,25 @@ class ViewAttendance extends React.Component {
   }
 
   async retrieveListAdmin(matriculationNo) {
-    fetch("http://localhost:5000/api/attendance/view/", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        matriculationNo: matriculationNo
-      })
-    })
-      .then(res => res.json())
-      .then(res =>
-        this.setState({
-          attendance: res
+    if (RegExp(/[A-Za-z][0-9]{7}[A-Za-z]/).test(matriculationNo)) {
+      fetch("http://localhost:5000/api/attendance/view/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          matriculationNo: matriculationNo
         })
-      );
+      })
+        .then(res => res.json())
+        .then(res =>
+          this.setState({
+            attendance: res
+          })
+        );
+    } else {
+      alert("Please enter a valid matriculation no.");
+    }
   }
 
   async retrieveList() {
