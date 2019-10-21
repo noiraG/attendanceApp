@@ -166,6 +166,10 @@ class ViewStudent extends React.Component {
       body: JSON.stringify({
         referenceKey: reference
       })
+    }).then(res => {
+      res
+        ? alert("Student account deleted successfully")
+        : alert("Student account is not deleted successfully");
     });
     this.retrieveStudent();
   }

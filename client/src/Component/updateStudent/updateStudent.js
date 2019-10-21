@@ -95,7 +95,9 @@ export default class UpdateStudent extends React.Component {
         })
           .then(res => res.json())
           .then(res =>
-            res ? alert("class has been updated") : alert("Class update failed")
+            res
+              ? alert("Student has been updated")
+              : alert("Student update failed")
           );
       } else {
         alert("Please enter a valid password");

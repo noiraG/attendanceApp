@@ -203,8 +203,10 @@ export default class AddStudent extends React.Component {
               password: "",
               descriptor: null,
               image: null,
-              showCamera: true
+              showCamera: true,
+              imageCounter: 0
             });
+            descriptorSet = [];
             this.setState({
               loadingState: false
             });

@@ -710,6 +710,7 @@ app.post(
     var matriculationNo = req.body.matriculationNo;
     var status = classDetail.status;
     var classReferenceID = 0;
+    let flag = false;
     attendanceStatus = {
       status: status
     };
@@ -740,7 +741,7 @@ app.post(
         ) {
           // console.log("ID located");
           console.log("class reference ID: ", classKey);
-          classReferenceID = classKey;
+          classReferenceID = await classKey;
         }
       }
 
@@ -753,11 +754,17 @@ app.post(
             .startAt(String(classReferenceID))
             .once("value", resolve)
         );
-
+        console.log("snapshot: ", snapshot.val());
         if (snapshot.exists()) {
           studentInClass = snapshot.val();
           for (e in studentInClass) {
             if (studentInClass[e].matriculationNo == matriculationNo) {
+              console.log(
+                "matriculationNo: ",
+                studentInClass[e].matriculationNo,
+                " and ",
+                matriculationNo
+              );
               console.log("class reference ID", e);
               console.log("classStringID: ", classReferenceID);
               await ref
@@ -766,10 +773,14 @@ app.post(
                 .update(attendanceStatus);
               console.log("test");
               res.send(true);
+              flag = true;
             }
           }
+          if (!flag) {
+            console.log("return false");
+            res.send(false);
+          }
         } else {
-          console.log("test");
           res.send(false);
         }
       } else {
