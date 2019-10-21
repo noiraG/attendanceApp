@@ -187,6 +187,10 @@ export default class ViewClassSession extends React.Component {
       body: JSON.stringify({
         referenceKey: reference
       })
+    }).then(res => {
+      res
+        ? alert("Class Session deleted successfully")
+        : alert("Class Session is not deleted successfully");
     });
     this.retrieveList();
   }

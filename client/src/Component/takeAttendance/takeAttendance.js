@@ -219,15 +219,12 @@ class TakeAttendance extends React.Component {
               })
                 .then(res => res.json())
                 .then(res => {
-                  if (!res) {
-                    this.setState({ loadingState: false });
-                    alert(
-                      "Error occurred. Please ensure the input is valid or approach administrator for assistance."
-                    );
-                  } else if (res === true) {
-                    this.setState({ loadingState: false });
-                    alert("Attendance has been recorded");
-                  }
+                  this.setState({ loadingState: false });
+                  res
+                    ? alert("Attendance has been recorded")
+                    : alert(
+                        "Error occurred. Please ensure the input is valid or approach administrator for assistance."
+                      );
                 });
             })
             .catch(e =>
@@ -270,13 +267,10 @@ class TakeAttendance extends React.Component {
           })
             .then(res => res.json())
             .then(res => {
-              if (!res) {
-                this.setState({ loadingState: false });
-                alert("There was an error");
-              } else if (res === true) {
-                this.setState({ loadingState: false });
-                alert("Attendance has been recorded");
-              }
+              this.setState({ loadingState: false });
+              res
+                ? alert("Attendance has been recorded")
+                : alert("Attendance is not updated. Error occurred.");
             });
         } else {
           alert("Please enter a valid student matriculation No.");
